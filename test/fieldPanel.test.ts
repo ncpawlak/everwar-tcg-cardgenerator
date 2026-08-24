@@ -1,42 +1,73 @@
-// STORY-11 test (@vitest-environment jsdom) — the field panel is a pure function of
-// the field config + seed values. Assert inputs are pre-filled, the abilities control
-// is a textarea, an input event calls back with the right id/value, and wired through
-// app state a burst of edits yields exactly one debounced redraw.
+// STORY-11 / STORY-14 test (@vitest-environment jsdom) — the field panel is a pure
+// function of the field config + seed values. Assert single-line inputs are pre-filled,
+// the abilities block expands into THREE ability rows (name input + body textarea each)
+// pre-filled from the six slot keys, an input event calls back with the right id/value,
+// and wiring through app state yields exactly one debounced redraw.
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
 import { createFieldPanel } from '../src/ui/fieldPanel';
 import { createAppState } from '../src/state/appState';
-import { EDITABLE_FIELDS } from '../src/config/editableLayers';
+import { EDITABLE_FIELDS, ABILITY_SLOTS } from '../src/config/editableLayers';
 
 function seedValues(): Record<string, string> {
   const v: Record<string, string> = {};
-  for (const f of EDITABLE_FIELDS) v[f.id] = f.id === 'abilities' ? 'Body text' : f.label;
+  // Seed the 9 layer-backed fields by id.
+  for (const f of EDITABLE_FIELDS) if (f.kind !== 'abilities') v[f.id] = f.label;
   v['level'] = '4';
+  // Seed the six ability slot keys (first slot filled, rest blank).
+  v['ability1-name'] = 'Rallying Cry';
+  v['ability1-body'] = 'Body text one';
   return v;
 }
 
 describe('fieldPanel', () => {
-  it('pre-fills every field control from the seed values', () => {
+  it('pre-fills every single-line control from the seed values', () => {
     const panel = createFieldPanel({
       fields: EDITABLE_FIELDS,
       seed: seedValues(),
       onInput: () => {},
     });
     document.body.appendChild(panel);
-    // One control per field.
+    // One control per non-abilities field.
     for (const f of EDITABLE_FIELDS) {
+      if (f.kind === 'abilities') continue;
       const ctrl = panel.querySelector(`[data-field-id="${f.id}"]`) as HTMLInputElement;
       expect(ctrl).toBeTruthy();
     }
     const level = panel.querySelector('[data-field-id="level"]') as HTMLInputElement;
     expect(level.value).toBe('4');
-    // Abilities uses a textarea (multi-line).
-    const abilities = panel.querySelector('[data-field-id="abilities"]') as HTMLTextAreaElement;
-    expect(abilities.tagName).toBe('TEXTAREA');
-    expect(abilities.value).toBe('Body text');
   });
 
-  it('calls onInput with the field id and new value on input', () => {
+  it('renders three ability rows: a NAME input + BODY textarea per slot', () => {
+    const panel = createFieldPanel({
+      fields: EDITABLE_FIELDS,
+      seed: seedValues(),
+      onInput: () => {},
+    });
+    document.body.appendChild(panel);
+    // There must be exactly three ability slots wired.
+    expect(ABILITY_SLOTS).toHaveLength(3);
+    for (const slot of ABILITY_SLOTS) {
+      const name = panel.querySelector(`[data-field-id="${slot.nameKey}"]`) as HTMLInputElement;
+      const body = panel.querySelector(`[data-field-id="${slot.bodyKey}"]`) as HTMLTextAreaElement;
+      expect(name).toBeTruthy();
+      expect(name.tagName).toBe('INPUT');
+      expect(body).toBeTruthy();
+      expect(body.tagName).toBe('TEXTAREA');
+    }
+    // First slot is pre-filled from the seed.
+    const n1 = panel.querySelector('[data-field-id="ability1-name"]') as HTMLInputElement;
+    const b1 = panel.querySelector('[data-field-id="ability1-body"]') as HTMLTextAreaElement;
+    expect(n1.value).toBe('Rallying Cry');
+    expect(b1.value).toBe('Body text one');
+    // Empty slots render blank.
+    const n2 = panel.querySelector('[data-field-id="ability2-name"]') as HTMLInputElement;
+    expect(n2.value).toBe('');
+    // No single "abilities" control remains.
+    expect(panel.querySelector('[data-field-id="abilities"]')).toBeNull();
+  });
+
+  it('calls onInput with the field id and new value on input (layer field + ability)', () => {
     const onInput = vi.fn();
     const panel = createFieldPanel({ fields: EDITABLE_FIELDS, seed: seedValues(), onInput });
     document.body.appendChild(panel);
@@ -44,6 +75,11 @@ describe('fieldPanel', () => {
     level.value = '9';
     level.dispatchEvent(new Event('input', { bubbles: true }));
     expect(onInput).toHaveBeenCalledWith('level', '9');
+
+    const body = panel.querySelector('[data-field-id="ability2-body"]') as HTMLTextAreaElement;
+    body.value = 'Last Stand text';
+    body.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('ability2-body', 'Last Stand text');
   });
 
   it('wired to app state, a burst of edits triggers one debounced redraw', () => {

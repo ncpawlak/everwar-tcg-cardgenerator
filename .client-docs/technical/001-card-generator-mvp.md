@@ -20,7 +20,7 @@ main.ts (composition root)
   extractModel(psd)  → typed, serializable CardModel from the allow-list
   bakeBackground()   → composite non-editable leaves → cached raster (ONCE)
   createAppState()   → seeded values + ~120ms debounced notify
-  createFieldPanel() → inputs (9) + abilities textarea; edits → state.set
+  createFieldPanel() → inputs (9) + 3 ability rows (name+text); edits → state.set
   createLivePreview()→ panel + state + start(ctx): first render + debounced subscribe
   buildLayout()      → canvas preview + Export button + status
   renderCard()       → draw cached bg + all editable fields  (ONLY this re-runs on edit)
@@ -36,21 +36,24 @@ never re-baked (spec §4.3, §5). Debounce lives in `appState`, so the UI stays 
 src/
 ├─ main.ts                     composition root (order above)
 ├─ style.css                   app styles
-├─ config/editableLayers.ts    ALLOW-LIST: 9 layer names + abilities box geometry
+├─ config/editableLayers.ts    ALLOW-LIST: 9 layer names + abilities geometry + slots
 ├─ psd/
 │  ├─ loadPsd.ts               readPsdBuffer / loadPsd(url) / flattenLayers
 │  ├─ extractModel.ts          walk + classify → CardModel (loud on missing layer)
-│  └─ types.ts                 StyleRun, Bounds, Anchor, FieldModel, CardModel
+│  └─ types.ts                 StyleRun, Bounds, Anchor, Ability, FieldModel, CardModel
 ├─ fonts/loadFonts.ts          FontFace register, fail-loud, injectable deps
 ├─ render/
-│  ├─ bakeBackground.ts        back-to-front drawImage of non-editable leaves
+│  ├─ bakeBackground.ts        back-to-front drawImage of non-editable leaves + badge patch
 │  ├─ layoutTitle.ts           PURE per-run small-caps advance + shrink-to-fit
 │  ├─ fitText.ts               PURE single-line shrink-to-fit (tracking→scale)
 │  ├─ wrapText.ts              PURE greedy word-wrap + clip (injected measurer)
-│  ├─ drawText.ts              draw one field (single-line / title / abilities+clip)
+│  ├─ abilitiesLayout.ts       PURE mixed-weight wrap + block fit/clip (injected measurer)
+│  ├─ drawText.ts              draw one layer-backed field (single-line / title)
+│  ├─ drawAbilities.ts         draw the up-to-3 structured abilities (bold name + body)
 │  └─ renderCard.ts            bg + every field (the edit-time redraw)
 ├─ state/appState.ts           values + debounced subscribe
 ├─ app/livePreview.ts          edit-loop wiring (panel+state+debounced render)
+├─ app/seedValues.ts           model → initial value map (abilities → 6 slot keys)
 ├─ ui/fieldPanel.ts            labelled controls from config + seed
 ├─ ui/preview.ts               two-column layout, canvas, export button
 └─ export/exportPng.ts         toBlob → showSaveFilePicker (download fallback)
@@ -58,19 +61,26 @@ src/
 
 ## Key design decisions
 
-- **Inject the measurer.** `layoutTitle` and `wrapText` take
+- **Inject the measurer.** `layoutTitle`, `wrapText`, and `abilitiesLayout` take
   `measure(text, font) => number` instead of a live canvas. The browser passes
   `ctx.measureText`; tests pass a deterministic stub. This makes the hardest logic
-  (faux small-caps advance, word-wrap + clip) unit-testable in pure Node.
+  (faux small-caps advance, word-wrap + clip, mixed-weight ability wrapping + block fit)
+  unit-testable in pure Node.
 - **Explicit allow-list** (`config/editableLayers.ts`) is the single source of truth for
   extraction, the bake skip-set, and the UI panel — one definition, three consumers.
 - **Faux small-caps** = per-run `styleRuns` sizing (`[45.83, 37.5, 45.83, 37.5]` over
   lengths `[1, 8, 1, 8]`), each run advanced by its measured width, baseline at the
   engine `transform` (≈ 69.63, 75.92). Edited titles re-segment via the rule "first
   glyph of each word large, rest small".
-- **Abilities body** is authored (no PSD layer): box `(37,808)–(664,968)`, padded area
-  `x=59, y=824, w=583`, white `Square721BT-RomanCondensed` 21px / 25px line-height,
-  clipped to the box bottom.
+- **Abilities body** is authored (no PSD layer) and **structured**: up to 3
+  `{ name, body }` abilities. In state each is two flat keys (`ability{1..3}-name/-body`);
+  `renderCard` special-cases the abilities field → `drawAbilities`, which gathers the six
+  keys, skips blank pairs, and lays them out via the pure `abilitiesLayout`. Each ability
+  renders a **bold** name + ": " + regular body, inline-wrapping (continuation lines are
+  regular). The badge-removed box reclaims the top: interior `(37,771)–(664,971)`, text
+  starts `x=59, y=780, w=583` (191px usable), ~6px paragraph gap, whole-line clip at
+  y=971, dormant shrink-to-fit (floor 0.7×) if it overflows. White
+  `Square721BT-RomanCondensed` body / `Square721BT-BoldCondensed` name, 21px / 25px.
 - **Opacity is 0–1** in ag-psd — applied directly as canvas alpha (never `/255`).
 - **`@napi-rs/canvas` is dev/test-only** — it renders/measures in Node tests and feeds
   `ag-psd`'s `initializeCanvas`; it never enters the browser bundle.

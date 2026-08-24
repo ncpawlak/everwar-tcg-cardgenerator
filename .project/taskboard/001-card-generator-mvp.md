@@ -533,3 +533,29 @@ Applied after both Gate 2 reviews signed off; full suite kept green (59 tests).
   available-width source changed (`titleAvailableWidth` in `fitText.ts`, wired in
   `drawText.ts`); single-line fields untouched. Tests added in `test/fitText.test.ts`
   and `test/layoutTitle.test.ts`. Full suite green (64 tests).
+
+
+---
+
+## STORY-14 — Structured abilities (up to 3, user-approved "Variant D")
+
+Post-badge-removal enhancement; full suite kept green (76 tests, fidelity 0.914%).
+
+- **MODEL.** The single free-text `abilities` field became an ordered list of up to 3
+  `{ name, body }` abilities. `AbilitiesFieldModel` (src/psd/types.ts) now carries
+  `abilities[]`, `boldFont`, `paragraphGap`, `minScale`, `textBottom`; `extractModel`
+  seeds one placeholder + two empty (skipped at render). In state each ability is two
+  flat keys (`ability{1..3}-name/-body`), seeded by the shared `src/app/seedValues.ts`.
+- **UI.** `fieldPanel.ts` expands abilities into three rows (NAME input + BODY textarea
+  each), wired to the six slot keys via the existing ~120ms debounce.
+- **RENDER.** Reclaimed text-top **y=780** (first black interior row below the top gold
+  border is y771; +9px pad), text-bottom **y=971** → 191px usable (was 144 from y=824).
+  Each ability renders a **bold** NAME + ": " + **regular** BODY inline-wrapping;
+  continuation lines are regular. ~6px gap between abilities. New pure module
+  `src/render/abilitiesLayout.ts` (mixed-weight tokens, per-word fonts, whole-line clip,
+  dormant shrink-to-fit floored 0.7x) + `src/render/drawAbilities.ts`. Realistic
+  3-ability sample fits at native scale 1.0 (Variant D).
+- **TESTS.** `test/abilitiesLayout.test.ts` (pure: bold-metric prefix, wrap, gaps,
+  reclaimed top, skip-empty, shrink, clip) + `test/abilitiesFit.test.ts` (real-font
+  Variant D fit). Updated config/extractModel/fidelity/renderCard/fieldPanel tests.
+  Fidelity stays 0.914% (baseline renders abilities EMPTY). Test count 65 -> 76.

@@ -9,6 +9,7 @@ import {
   ABILITIES_FIELD,
   ABILITIES_BOX,
   ABILITIES_TEXT_AREA,
+  ABILITIES_TEXT_BOTTOM,
   type EditableField,
   type Rgb,
 } from '../config/editableLayers';
@@ -62,17 +63,22 @@ export function extractModel(
     order.push(field.id);
 
     if (field.kind === 'abilities') {
-      // Synthesized from config — no PSD layer backs the abilities body.
+      // Synthesized from config — no PSD layer backs the abilities body. Seed the
+      // ordered abilities list (deep-copied so the model stays independent of config).
       const abilities: AbilitiesFieldModel = {
         id: 'abilities',
         kind: 'abilities',
-        text: ABILITIES_FIELD.defaultText,
+        abilities: ABILITIES_FIELD.defaultAbilities.map((a) => ({ ...a })),
         font: ABILITIES_FIELD.font,
+        boldFont: ABILITIES_FIELD.boldFont,
         fontSize: ABILITIES_FIELD.fontSize,
         lineHeight: ABILITIES_FIELD.lineHeight,
+        paragraphGap: ABILITIES_FIELD.paragraphGap,
+        minScale: ABILITIES_FIELD.minScale,
         color: ABILITIES_FIELD.color,
         box: { ...ABILITIES_BOX },
         textArea: { ...ABILITIES_TEXT_AREA },
+        textBottom: ABILITIES_TEXT_BOTTOM,
       };
       modelFields[field.id] = abilities;
       continue;

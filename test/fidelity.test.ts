@@ -9,6 +9,8 @@ import { extractModel } from '../src/psd/extractModel';
 import { bakeBackground } from '../src/render/bakeBackground';
 import { renderCard } from '../src/render/renderCard';
 import type { CardModel } from '../src/psd/types';
+import { seedValues } from '../src/app/seedValues';
+import { ABILITY_SLOTS } from '../src/config/editableLayers';
 import { setupNapiCanvas, readCardPsdBuffer, createCanvas } from './helpers/napiCanvas';
 
 beforeAll(() => setupNapiCanvas());
@@ -28,10 +30,13 @@ const MAX_MISMATCH_RATIO = 0.03;
 
 /** Original PSD values: captured texts, but the abilities body is empty (no layer). */
 function originalValues(model: CardModel): Record<string, string> {
-  const v: Record<string, string> = {};
-  for (const id of model.order) v[id] = model.fields[id].text;
-  // The PSD composite has NO abilities body layer, so the faithful baseline is empty.
-  v['abilities'] = '';
+  const v = seedValues(model);
+  // The PSD composite has NO abilities body, so the faithful baseline is empty:
+  // blank all six ability slot keys so nothing renders in the abilities box.
+  for (const slot of ABILITY_SLOTS) {
+    v[slot.nameKey] = '';
+    v[slot.bodyKey] = '';
+  }
   return v;
 }
 
@@ -85,19 +90,23 @@ describe('fidelity baseline', () => {
     expect(big).toBeGreaterThan(small);
   });
 
-  it('abilities region renders within its box (no pixels below y=968)', () => {
+  it('abilities region renders within its box (no pixels below y=971)', () => {
     const psd = readPsdBuffer(readCardPsdBuffer());
     const model = extractModel(psd);
     const bg = bakeBackground(psd, { createCanvas: factory });
     const canvas = createCanvas(model.width, model.height) as any;
     const ctx = canvas.getContext('2d');
-    // Render WITH a long abilities body to prove the clip holds.
+    // Render WITH a very long abilities body to prove the whole-line clip holds.
     const values = originalValues(model);
-    values['abilities'] = model.fields['abilities'].text; // long default paragraph
+    values['ability1-name'] = 'Overflow Test';
+    values['ability1-body'] =
+      'This is a deliberately very long ability body repeated many times to force the ' +
+      'wrapped block to exceed the reclaimed box and prove that lines past the bottom ' +
+      'border are clipped whole and never drawn below the box interior at all. '.repeat(4);
     renderCard(ctx, bg, model, values);
 
     const bgCtx = bg.getContext('2d');
-    const y = 970; // just below the box bottom (968)
+    const y = 974; // just below the reclaimed box bottom (971)
     const rendered = ctx.getImageData(40, y, 600, 1).data;
     const base = bgCtx.getImageData(40, y, 600, 1).data;
     for (let i = 0; i < rendered.length; i++) {

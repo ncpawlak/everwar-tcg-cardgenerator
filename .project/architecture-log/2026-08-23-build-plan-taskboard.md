@@ -124,3 +124,24 @@ never "should pass."
   added to `fitText.test.ts` (bar-based width, not ink width) and `layoutTitle.test.ts`
   (medium title at native scale=1; extreme still shrinks to <= available). Test count
   59 -> 64, all green; build + lint clean.
+
+- **Structured abilities (STORY-14, "Variant D").** Replaced the single free-text
+  abilities block with an ordered list of up to 3 `{name, body}` abilities. Two design
+  decisions worth logging:
+  1. **Six flat value keys, one model field.** Abilities stay a single entry in
+     `model.order` (carrying geometry + seed list), but ride the existing
+     `Record<string,string>` state as `ability{1..3}-name/-body`. `renderCard`
+     special-cases the abilities field and delegates to `drawAbilities`, which gathers
+     the six keys; `drawText` was narrowed to `LayerFieldModel` (abilities no longer
+     flows through it). A shared `src/app/seedValues.ts` fans the model's abilities out
+     to the six keys (used by `main.ts` and tests).
+  2. **Mixed-weight inline runs, reclaimed top.** `src/render/abilitiesLayout.ts` is a
+     pure, measurer-injected core that tokenizes each ability into per-word runs (bold
+     NAME prefix measured with bold metrics, regular BODY), greedily wraps them into
+     positioned segments, inserts ~6px paragraph gaps, clips whole lines at y=971, and
+     runs a dormant shrink-to-fit (font+LH+gap scaled together, floor 0.7x) only when the
+     block overflows the reclaimed 191px box. Text-top moved 824 -> **780** (first black
+     interior row below the top gold border is y771, +9px pad), unlocked by the earlier
+     ABILITIES-badge removal. The realistic 3-ability sample fits at scale 1.0.
+  Fidelity baseline unchanged at **0.914%** (it bakes badge-on + abilities empty). Test
+  count 65 -> 76, all green; build + lint clean. No push.

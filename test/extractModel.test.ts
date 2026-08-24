@@ -62,11 +62,21 @@ describe('extractModel', () => {
     const ab = model.fields['abilities'];
     expect(isAbilities(ab)).toBe(true);
     if (isAbilities(ab)) {
-      expect(ab.box).toEqual({ left: 37, top: 808, right: 664, bottom: 968 });
-      expect(ab.textArea).toEqual({ x: 59, y: 824, w: 583 });
+      // Reclaimed-top interior box + text-top y=780 (191px usable height).
+      expect(ab.box).toEqual({ left: 37, top: 771, right: 664, bottom: 971 });
+      expect(ab.textArea).toEqual({ x: 59, y: 780, w: 583 });
+      expect(ab.textBottom).toBe(971);
       expect(ab.fontSize).toBe(21);
       expect(ab.lineHeight).toBe(25);
-      expect(ab.text.length).toBeGreaterThan(0);
+      expect(ab.paragraphGap).toBe(6);
+      expect(ab.minScale).toBe(0.7);
+      expect(ab.boldFont).toBe('Square721BT-BoldCondensed');
+      // Seeds up to 3 abilities: one non-empty placeholder + two empty.
+      expect(ab.abilities).toHaveLength(3);
+      expect(ab.abilities[0].name.length).toBeGreaterThan(0);
+      expect(ab.abilities[0].body.length).toBeGreaterThan(0);
+      expect(ab.abilities[1]).toEqual({ name: '', body: '' });
+      expect(ab.abilities[2]).toEqual({ name: '', body: '' });
     }
   });
 

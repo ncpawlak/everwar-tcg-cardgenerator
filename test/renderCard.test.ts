@@ -7,17 +7,16 @@ import { extractModel } from '../src/psd/extractModel';
 import { bakeBackground } from '../src/render/bakeBackground';
 import { renderCard } from '../src/render/renderCard';
 import type { CardModel } from '../src/psd/types';
+import { seedValues } from '../src/app/seedValues';
 import { setupNapiCanvas, readCardPsdBuffer, createCanvas } from './helpers/napiCanvas';
 
 beforeAll(() => setupNapiCanvas());
 
 const factory = (w: number, h: number) => createCanvas(w, h) as any;
 
-/** Seed the value map from the model's captured field texts. */
+/** Seed the value map from the model (abilities-aware: six slot keys). */
 function initialValues(model: CardModel): Record<string, string> {
-  const v: Record<string, string> = {};
-  for (const id of model.order) v[id] = model.fields[id].text;
-  return v;
+  return seedValues(model);
 }
 
 function build() {
@@ -54,10 +53,10 @@ describe('renderCard', () => {
     expect(diff).toBeGreaterThan(100);
   });
 
-  it('clips the abilities body — nothing renders below y=968', () => {
+  it('clips the abilities body — nothing renders below y=971', () => {
     const { ctx, bg } = build();
     const bgCtx = bg.getContext('2d');
-    // Sample a row below the box bottom within the abilities x-range.
+    // Sample a row below the box bottom (971) within the abilities x-range.
     const y = 975;
     const rendered = ctx.getImageData(40, y, 600, 1).data;
     const base = bgCtx.getImageData(40, y, 600, 1).data;

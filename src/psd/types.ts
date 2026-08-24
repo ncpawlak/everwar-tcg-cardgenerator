@@ -1,8 +1,8 @@
 // STORY-4 — Typed card model. These types are UI-agnostic and fully serializable
 // (NO live canvas refs), so the model can be snapshot-tested and seeded into state.
-import type { Rgb, FieldKind } from '../config/editableLayers';
+import type { Rgb, FieldKind, Ability } from '../config/editableLayers';
 
-export type { Rgb };
+export type { Rgb, Ability };
 
 /** A per-character run of the title, carrying its own font size (small-caps). */
 export interface StyleRun {
@@ -49,19 +49,33 @@ export interface LayerFieldModel {
   bounds: Bounds;
 }
 
-/** The authored abilities body block (no PSD layer). */
+/** The authored abilities body block (no PSD layer). Holds an ordered list of up to
+ * three structured abilities (bold name + regular body) plus the geometry + type
+ * needed to lay them out and shrink-to-fit (STORY-14 / Variant D). */
 export interface AbilitiesFieldModel {
   id: 'abilities';
   kind: 'abilities';
-  text: string;
+  /** Seed abilities (up to 3); empty name+body pairs are skipped at render. */
+  abilities: Ability[];
+  /** Regular body font family. */
   font: string;
+  /** Bold font family for the ability NAME prefix (the title font). */
+  boldFont: string;
+  /** Base font size in px. */
   fontSize: number;
+  /** Base line height in px. */
   lineHeight: number;
+  /** Vertical gap (px) between consecutive abilities. */
+  paragraphGap: number;
+  /** Readability floor for the dormant shrink-to-fit fallback. */
+  minScale: number;
   color: Rgb;
-  /** Content box (clip region). */
+  /** Content box (clip region — the black interior, top border to bottom border). */
   box: Bounds;
-  /** Padded text area: start x/y and wrap width. */
+  /** Padded text area: start x/y (reclaimed top) and wrap width. */
   textArea: { x: number; y: number; w: number };
+  /** Bottom y limit for text (whole-line clip). */
+  textBottom: number;
 }
 
 export type FieldModel = LayerFieldModel | AbilitiesFieldModel;

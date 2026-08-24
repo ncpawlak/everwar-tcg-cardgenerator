@@ -64,7 +64,7 @@ pre-filled with the PSD's current values on load.
 | 7 | `INFANTRY` | Unit Type | single-line value | |
 | 8 | `IRONWARD LEGION` | Faction | single-line value | |
 | 9 | `HUMAN` | Species / Tag | single-line value | |
-| 10 | *(none — new authored region)* | Abilities (body) | **wrapping block** | Multi-line, word-wrapping text inside the black abilities box. See §4.3. |
+| 10 | *(none — new authored region)* | Abilities (up to 3) | **structured wrapping block** | Up to **3** abilities, each a **bold NAME** + regular **BODY**, word-wrapping inline in the black abilities box. Empty (blank name+body) abilities are skipped. See §4.3 / §4.6. |
 
 **Single-line value** fields render using the layer's captured font family, font
 size, fill color, justification, and position/`transform` from the PSD text-engine
@@ -92,8 +92,10 @@ baked background and are not exposed for editing.
      position/`transform`, and bounds.
    - **Everything else** — art, frame, background, labels, chips, icons — treated
      as static.
-4. Detect the abilities content box from the composite (confirmed bounds
-     **(37,808)–(664,968)**); derive the padded text area **x=59, y=824, w=583**.
+4. Detect the abilities content box from the composite. With the baked **ABILITIES
+     badge removed** (opaque-black patch, see build log), the box's usable interior is
+     reclaimed at the top: interior **(37,771)–(664,971)**; text starts at the reclaimed
+     top **x=59, y=780, w=583** (191px usable height). See §4.6.
 
 > **Gotcha (logged):** `ag-psd` reports `layer.opacity` as a **0–1 float**, not
 > 0–255. Do not divide by 255.
@@ -117,9 +119,14 @@ Draw the cached background, then render the editable text over it on the Canvas:
   `transform`. Do **not** assume one size per layer. Edited titles are **shrunk to
   fit** their slot, scaling both small-caps run sizes by the same factor so the
   initial-cap / body ratio is preserved (§4.5).
-- **Abilities body** — word-wrap the text within the padded area (x=59, y=824,
-  w=583) in white **Square721BT-RomanCondensed**, ~**21px** font / ~**25px**
-  line-height, **clipped** to the box bottom (37,808)–(664,968).
+- **Abilities body** — up to **3 structured abilities**, each a **bold** NAME
+  (`Square721BT-BoldCondensed`) + `": "` + regular **BODY**
+  (`Square721BT-RomanCondensed`), rendered **inline** and word-wrapping across lines
+  (continuation lines are regular weight). White, native **21px** / **25px** line-height,
+  ~6px gap between abilities, starting at the reclaimed top **(x=59, y=780, w=583)** and
+  **clipped** whole-line to the box bottom **y=971**. Empty abilities are skipped. A
+  dormant shrink-to-fit fallback scales the whole block down (floor 0.7×) only if it
+  overflows. See §4.6.
 
 Only step 4.3 re-runs on an edit; parse and bake do not repeat.
 
@@ -160,6 +167,36 @@ The authored title (whose `styleRuns` still cover the text) is **never** shrunk,
 baked baseline / fidelity render is unaffected. This logic lives in the pure,
 measurer-injected layout core (`src/render/fitText.ts`, `layoutTitle.ts`) and is
 unit-tested without a canvas.
+
+### 4.6 Structured abilities (up to 3, user-approved "Variant D")
+
+The abilities region holds an **ordered list of up to 3 abilities**, each a
+`{ name, body }` pair. In the UI they are three rows (a NAME input + a BODY textarea
+each); in state they are six flat value keys (`ability{1..3}-name`, `ability{1..3}-body`)
+so the existing `Record<string,string>` store is unchanged. An ability whose name AND
+body are both blank is **skipped** at render (no line, no gap).
+
+**Layout.** For each non-empty ability the NAME renders **bold** (the title font,
+`Square721BT-BoldCondensed`) immediately followed by `": "` and the **regular** body
+(`Square721BT-RomanCondensed`), wrapping **inline** — the bold prefix sits on the first
+line and continuation lines are regular weight. A **~6px gap** separates abilities.
+Native size is **21px / 25px** line-height.
+
+**Reclaimed top.** With the baked ABILITIES badge removed, text starts at the **reclaimed
+top y=780** (measured: the first fully-black interior row below the top gold border is
+y771; +9px pad = 780) and is clipped whole-line at **y=971** (above the bottom gold
+border). Usable height is **191px** vs the old 144px (from y=824) — enough for the three
+realistic sample abilities at native size with no shrink.
+
+**Shrink-to-fit (dormant fallback).** If the full block (all non-empty abilities at
+native size) exceeds the 191px usable height, the font size, line-height, and paragraph
+gap are scaled **down together**, floored at **0.7×**, until it fits. For the realistic
+3-ability sample this is a no-op (scale 1.0). Any line still past y=971 after the floor is
+clipped whole (never mid-word).
+
+This all lives in the pure, measurer-injected core `src/render/abilitiesLayout.ts`
+(mixed-weight wrapping + block fit) and is drawn by `src/render/drawAbilities.ts`; both
+are unit-tested without a real canvas.
 
 ### 4.4 Fidelity notes
 

@@ -34,7 +34,7 @@ to load, the screen shows a clear red error instead of a wrong-looking card.
 | Card Name / Title | Big small-caps title (first letter of each word larger). |
 | Level, HP, Armor, DMG, ACC | The stat numbers. |
 | Unit Type, Faction, Species / Tag | The lower tag row. |
-| Abilities (body) | Multi-line box text — wraps automatically and is clipped to the abilities box. |
+| Abilities (up to 3) | Three ability slots, each with a **name** and a **text** box. The name shows in **bold**, followed by its text, wrapping inside the abilities box. Leave a slot blank to skip it. |
 
 Everything else (labels like LEVEL/HP, the COMMANDER/UNIQUE chips, all art and the frame)
 is locked and part of the fixed background — it can't be edited in v1.
@@ -44,6 +44,11 @@ is locked and part of the fixed background — it can't be edited in v1.
 Type in any field. The preview updates **automatically** a fraction of a second after you
 stop typing — there's no "apply" button. The title keeps its small-caps look as you edit;
 the abilities text re-wraps and stays inside its box (text past the bottom is hidden).
+
+**Abilities.** You can add up to **three** abilities. Each has a *name* field (rendered
+bold) and a *text* field. Fill in as many as you need — a blank slot is simply left out,
+and the abilities stack from the top of the box. If you enter far more text than fits, the
+whole abilities block shrinks slightly to keep everything visible.
 
 **Long text auto-shrinks.** If you type a name, faction, or stat that's wider than its
 slot, it's automatically condensed (tightened, then scaled down) so it stays on the card

@@ -1,24 +1,22 @@
-// STORY-9 — Draw a single editable field onto a 2D context. Single-line values use
-// the captured font/size/colour/justification at the baseline anchor; the title uses
-// per-run small-caps ops (STORY-7); the abilities body uses wrapped, clipped lines
-// (STORY-8). Layout math is delegated to the pure functions with `ctx.measureText`
-// injected as the measurer — no layout logic lives here.
-import type { FieldModel, Rgb } from '../psd/types';
-import { isAbilities } from '../psd/types';
+// STORY-9 — Draw a single layer-backed editable field onto a 2D context. Single-line
+// values use the captured font/size/colour/justification at the baseline anchor; the
+// title uses per-run small-caps ops (STORY-7). The abilities body is a separate path
+// (`drawAbilities`, STORY-14). Layout math is delegated to the pure functions with
+// `ctx.measureText` injected as the measurer — no layout logic lives here.
+import type { LayerFieldModel, Rgb } from '../psd/types';
 import { layoutTitle, type Measure } from './layoutTitle';
 import { layoutSingleLine, SINGLE_LINE_WIDTH_ALLOWANCE, titleAvailableWidth } from './fitText';
-import { wrapText } from './wrapText';
 
 /** A 2D context we can draw text on (DOM or napi). Typed loosely for cross-env use. */
 export type Ctx2D = any;
 
 /** Convert an Rgb to a CSS `rgb(...)` string. */
-function rgbCss(c: Rgb): string {
+export function rgbCss(c: Rgb): string {
   return `rgb(${c.r},${c.g},${c.b})`;
 }
 
 /** Build a measurer backed by the real canvas text engine. */
-function ctxMeasure(ctx: Ctx2D): Measure {
+export function ctxMeasure(ctx: Ctx2D): Measure {
   return (text: string, font: string) => {
     ctx.font = font;
     return ctx.measureText(text).width;
@@ -52,40 +50,10 @@ function toTextAlign(justification: string): CanvasTextAlign {
 }
 
 /**
- * Draw one field. `value` overrides the model's stored text (the live edited value).
+ * Draw one layer-backed field (title or single-line). `value` overrides the model's
+ * stored text (the live edited value). The abilities body is drawn separately.
  */
-export function drawText(ctx: Ctx2D, field: FieldModel, value: string): void {
-  if (isAbilities(field)) {
-    // Abilities body — wrap + clip to the content box, white RomanCondensed.
-    const font = `${field.fontSize}px "${field.font}"`;
-    ctx.save();
-    // Clip strictly to the content box so nothing draws below y = box.bottom.
-    ctx.beginPath();
-    ctx.rect(
-      field.box.left,
-      field.box.top,
-      field.box.right - field.box.left,
-      field.box.bottom - field.box.top,
-    );
-    ctx.clip();
-    ctx.fillStyle = rgbCss(field.color);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = font;
-    const lines = wrapText(value, {
-      x: field.textArea.x,
-      y: field.textArea.y,
-      maxWidth: field.textArea.w,
-      lineHeight: field.lineHeight,
-      maxBottom: field.box.bottom,
-      font,
-      measure: ctxMeasure(ctx),
-    });
-    for (const line of lines) ctx.fillText(line.text, line.x, line.y);
-    ctx.restore();
-    return;
-  }
-
+export function drawText(ctx: Ctx2D, field: LayerFieldModel, value: string): void {
   // Layer-backed field (title or single-line).
   ctx.fillStyle = rgbCss(field.color);
   // Reset tracking before measuring/drawing so leftover spacing never skews layout.

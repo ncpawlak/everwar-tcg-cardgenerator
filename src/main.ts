@@ -13,18 +13,10 @@ import { loadPsd } from './psd/loadPsd';
 import { extractModel } from './psd/extractModel';
 import { bakeBackground } from './render/bakeBackground';
 import { createLivePreview } from './app/livePreview';
+import { seedValues } from './app/seedValues';
 import { buildLayout } from './ui/preview';
 import { exportPng } from './export/exportPng';
 import { EDITABLE_FIELDS } from './config/editableLayers';
-import type { CardModel } from './psd/types';
-import type { Values } from './state/appState';
-
-/** Seed the value map from the model's captured field texts. */
-function seedFromModel(model: CardModel): Values {
-  const values: Values = {};
-  for (const id of model.order) values[id] = model.fields[id].text;
-  return values;
-}
 
 /** Show a loud, readable fatal error in the app root (fonts/PSD failures, etc.). */
 function showFatal(root: HTMLElement, err: unknown): void {
@@ -59,7 +51,7 @@ async function main(): Promise<void> {
     const background = bakeBackground(psd);
 
     // 5. Seed state + wire the live-preview edit loop (panel + debounced re-render).
-    const seed = seedFromModel(model);
+    const seed = seedValues(model);
     const live = createLivePreview({
       fields: EDITABLE_FIELDS,
       seed,

@@ -27,57 +27,112 @@ export interface LayerField {
   kind: 'title' | 'single-line';
 }
 
+/** One structured ability: a bold NAME and a regular BODY (STORY-14 / Variant D). */
+export interface Ability {
+  name: string;
+  body: string;
+}
+
+/**
+ * The state keys + UI labels for one of the (up to 3) ability slots. Each ability is
+ * serialized as TWO flat value keys (name + body) so it rides the existing
+ * `Values = Record<string,string>` store without any structural change to app state.
+ */
+export interface AbilitySlot {
+  nameKey: string;
+  bodyKey: string;
+  label: string;
+}
+
+/**
+ * Up to THREE ability slots. Each ability is stored as two value keys
+ * (`abilityN-name`, `abilityN-body`); an ability whose name AND body are both blank is
+ * skipped at render (STORY-14). This is the single source of truth for the ordering.
+ */
+export const ABILITY_SLOTS: readonly AbilitySlot[] = [
+  { nameKey: 'ability1-name', bodyKey: 'ability1-body', label: 'Ability 1' },
+  { nameKey: 'ability2-name', bodyKey: 'ability2-body', label: 'Ability 2' },
+  { nameKey: 'ability3-name', bodyKey: 'ability3-body', label: 'Ability 3' },
+] as const;
+
 /** The authored abilities body region — has NO backing PSD layer. */
 export interface AbilitiesField {
   id: string;
   layerName: null;
   label: string;
   kind: 'abilities';
-  /** Font family (registered name). */
+  /** Regular body font family (registered name). */
   font: string;
-  /** Font size in px. */
+  /** Bold font used for the ability NAME prefix (the title font). */
+  boldFont: string;
+  /** Base font size in px. */
   fontSize: number;
-  /** Line height in px. */
+  /** Base line height in px. */
   lineHeight: number;
+  /** Extra vertical gap (px) inserted between consecutive abilities. */
+  paragraphGap: number;
+  /** Readability floor for the block shrink-to-fit fallback (0.7 per spec). */
+  minScale: number;
   /** Fill colour (white per spec §4.3). */
   color: Rgb;
-  /** Seed text shown on load (abilities has no PSD layer to pre-fill from). */
-  defaultText: string;
+  /** Seed abilities shown on load (abilities has no PSD layer to pre-fill from). */
+  defaultAbilities: Ability[];
 }
 
 export type EditableField = LayerField | AbilitiesField;
 
-// Abilities content box, detected in the spike (spec §4.1): (37,808)–(664,968).
+// Abilities black-interior clip box (690×1020 card space), MEASURED from the PSD
+// composite AFTER the ABILITIES badge removal reclaimed the top of the box:
+//   - top = 771: the first fully-black interior row just BELOW the top gold border
+//     (the border peaks y768–770). Text may now start here instead of the old y=808.
+//   - bottom = 971: the last black interior row just ABOVE the bottom gold border
+//     (which starts y972). Lines are clipped to this bottom.
 export const ABILITIES_BOX = {
   left: 37,
-  top: 808,
+  top: 771,
   right: 664,
-  bottom: 968,
+  bottom: 971,
 } as const;
 
-// Padded text area derived from the box (spec §4.3): x=59, y=824, w=583.
+// Padded text area derived from the box (spec §4.5). The reclaimed top lets text start
+// at y=780 (interior top 771 + 9px pad), giving 191px usable height (971−780) vs the
+// old 144px (from y=824) — enough for 3 abilities at native 21px with no shrink.
 export const ABILITIES_TEXT_AREA = {
   x: 59,
-  y: 824,
+  y: 780,
   w: 583,
 } as const;
+
+// Bottom limit for abilities text (clip). A whole line is dropped if it would extend
+// past this y (never mid-word); matches the box interior bottom.
+export const ABILITIES_TEXT_BOTTOM = 971 as const;
 
 // The abilities field definition (synthesized — no PSD layer backs it).
 export const ABILITIES_FIELD: AbilitiesField = {
   id: 'abilities',
   layerName: null,
-  label: 'Abilities (body)',
+  label: 'Abilities',
   kind: 'abilities',
   font: 'Square721BT-RomanCondensed',
+  boldFont: 'Square721BT-BoldCondensed',
   fontSize: 21,
   lineHeight: 25,
+  paragraphGap: 6,
+  minScale: 0.7,
   color: { r: 255, g: 255, b: 255 },
-  // Authored placeholder body (the card ships with no abilities PSD layer). Mirrors
-  // the spike's sample so the box shows realistic wrapped text on first load.
-  defaultText:
-    'Rallying Cry: At the start of your turn, all friendly INFANTRY units gain ' +
-    '+5 ATTACK and +5 ACCURACY until end of turn. Ironfist Commander cannot be ' +
-    'targeted by enemy abilities while at least two allied units remain on the field.',
+  // Authored defaults (the card ships with no abilities PSD layer): ONE realistic
+  // placeholder ability, the other two empty (skipped at render). Mirrors how the
+  // single free-text field was previously seeded.
+  defaultAbilities: [
+    {
+      name: 'Rallying Cry',
+      body:
+        'At the start of your turn, all friendly INFANTRY units gain +5 ATTACK and ' +
+        '+5 ACCURACY until end of turn.',
+    },
+    { name: '', body: '' },
+    { name: '', body: '' },
+  ],
 };
 
 // The 9 name-mapped fields, in spec §3 order. The first is the per-run small-caps
