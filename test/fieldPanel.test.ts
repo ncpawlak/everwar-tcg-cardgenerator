@@ -90,6 +90,27 @@ describe('fieldPanel', () => {
     expect(onInput).toHaveBeenCalledWith('armorBars', '0');
   });
 
+  it('renders Commander/Unique checkboxes (default checked) that emit true/false (STORY-16)', () => {
+    const onInput = vi.fn();
+    const panel = createFieldPanel({ fields: EDITABLE_FIELDS, seed: seedValues(), onInput });
+    document.body.appendChild(panel);
+    const commander = panel.querySelector('[data-field-id="commander"]') as HTMLInputElement;
+    const unique = panel.querySelector('[data-field-id="unique"]') as HTMLInputElement;
+    expect(commander).toBeTruthy();
+    expect(commander.type).toBe('checkbox');
+    expect(unique.type).toBe('checkbox');
+    // Default checked (no 'false' seed).
+    expect(commander.checked).toBe(true);
+    expect(unique.checked).toBe(true);
+    // Unchecking emits 'false'; re-checking emits 'true'.
+    commander.checked = false;
+    commander.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('commander', 'false');
+    unique.checked = false;
+    unique.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('unique', 'false');
+  });
+
   it('calls onInput with the field id and new value on input (layer field + ability)', () => {
     const onInput = vi.fn();
     const panel = createFieldPanel({ fields: EDITABLE_FIELDS, seed: seedValues(), onInput });

@@ -131,5 +131,9 @@ export function extractModel(
     // Authored armor-bar control (STORY-15). No PSD layer backs it; default to the
     // template's baked 8-segment count so the card looks unchanged on load.
     armorBars: ARMOR_BARS_DEFAULT,
+    // Authored chip visibility flags (STORY-16). Default true = show the baked pills, so
+    // the card is unchanged on load and the fidelity baseline stays honest.
+    commander: true,
+    unique: true,
   };
 }

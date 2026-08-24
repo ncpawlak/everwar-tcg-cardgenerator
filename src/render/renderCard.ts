@@ -6,6 +6,8 @@ import { isAbilities } from '../psd/types';
 import { drawText, type Ctx2D } from './drawText';
 import { drawAbilities } from './drawAbilities';
 import { drawArmorBar } from './drawArmorBar';
+import { patchChip } from './patchChip';
+import { COMMANDER_CHIP_RECT, UNIQUE_CHIP_RECT } from '../config/chips';
 
 /** Anything drawImage accepts as a source (canvas/bitmap). Typed loosely for env. */
 export type BackgroundSource = any;
@@ -24,6 +26,12 @@ export function renderCard(
   // an opaque colour). Then blit the pre-baked background.
   ctx.clearRect(0, 0, model.width, model.height);
   ctx.drawImage(background, 0, 0);
+
+  // Dynamic COMMANDER / UNIQUE chips (STORY-16): patch a chip OUT only when its flag is
+  // explicitly 'false'. Runs right after the background blit (so the donor strip reads the
+  // baked rail) and before the armor bar / text. Default/absent = shown (fidelity honest).
+  if (values['commander'] === 'false') patchChip(ctx, COMMANDER_CHIP_RECT);
+  if (values['unique'] === 'false') patchChip(ctx, UNIQUE_CHIP_RECT);
 
   // Dynamic armor bar (STORY-15): drawn over the (patched) background and BEFORE any
   // editable text. Skipped ONLY when the value key is absent — the fidelity baseline

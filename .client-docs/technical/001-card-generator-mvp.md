@@ -49,10 +49,11 @@ src/
 │  ├─ wrapText.ts              PURE greedy word-wrap + clip (injected measurer)
 │  ├─ abilitiesLayout.ts       PURE mixed-weight wrap + block fit/clip (injected measurer)
 │  ├─ armorBarLayout.ts        PURE armor segment rects + coerce/clamp (no canvas)
+│  ├─ patchChip.ts             PURE row-median + patch a COMMANDER/UNIQUE chip out
 │  ├─ drawText.ts              draw one layer-backed field (single-line / title)
 │  ├─ drawAbilities.ts         draw the up-to-3 structured abilities (bold name + body)
 │  ├─ drawArmorBar.ts          draw the dynamic 0–8 armor bar (empty track / gradient segs)
-│  └─ renderCard.ts            bg + armor bar + every field (the edit-time redraw)
+│  └─ renderCard.ts            bg + chip patches + armor bar + every field (edit-time redraw)
 ├─ state/appState.ts           values + debounced subscribe
 ├─ app/livePreview.ts          edit-loop wiring (panel+state+debounced render)
 ├─ app/seedValues.ts           model → initial value map (abilities → 6 slot keys)
@@ -91,6 +92,18 @@ src/
   bake (`bakeBackground` `patchArmorBar`, default true); the fidelity baseline disables it
   and omits `armorBars` to keep 0.914%. Config (geometry/colours/patch) lives in
   `config/armorBar.ts`.
+- **Dynamic COMMANDER / UNIQUE chips** are authored booleans (`commander`, `unique`, both
+  default true), separate from any text layer. The pills are baked into a broad raster
+  (`Layer 3`), so a chip is hidden by patching its rect at render time, not by skipping a
+  layer. `renderCard` calls `patchChip` for each chip whose flag is `'false'`, after the
+  background blit and before the armor bar / text (live toggles, no re-bake). `patchChip`
+  reconstructs each rect row from the per-row **median** of a no-chip donor strip
+  (`CHIP_DONOR_STRIP {380,500}`) via `putImageData` — a wholesale pixel replace. On this
+  card that donor rail is a transparent frame cutout, so the pill is cleared to transparent
+  to match the empty slot; `putImageData` (not `fillRect`) is required so a transparent
+  donor actually erases the opaque baked pill. Rects (`config/chips.ts`) stop at y=728, above
+  the INFANTRY tag row. Both-true default → no patch → fidelity 0.914% holds. Hide-only, no
+  reflow of the remaining chip (product-approved).
 - **Opacity is 0–1** in ag-psd — applied directly as canvas alpha (never `/255`).
 - **`@napi-rs/canvas` is dev/test-only** — it renders/measures in Node tests and feeds
   `ag-psd`'s `initializeCanvas`; it never enters the browser bundle.

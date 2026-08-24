@@ -68,7 +68,45 @@ export function createFieldPanel(deps: FieldPanelDeps): HTMLElement {
   // STORY-15 — authored armor-bar control (not a PSD field, so appended after the loop).
   appendArmorBarRow(panel, seed, onInput);
 
+  // STORY-16 — authored chip visibility checkboxes (also not PSD fields).
+  appendChipCheckbox(panel, 'commander', 'Commander', seed, onInput);
+  appendChipCheckbox(panel, 'unique', 'Unique', seed, onInput);
+
   return panel;
+}
+
+/**
+ * Append a chip visibility checkbox (COMMANDER / UNIQUE). Checked = shown; the value is
+ * written to state as the string 'true'/'false' (the render path hides a chip only when
+ * its value is exactly 'false'). Defaults to checked unless the seed says 'false'.
+ */
+function appendChipCheckbox(
+  panel: HTMLElement,
+  key: 'commander' | 'unique',
+  label: string,
+  seed: Record<string, string>,
+  onInput: (id: string, value: string) => void,
+): void {
+  const row = document.createElement('div');
+  row.className = 'field-row';
+
+  const control = document.createElement('input');
+  control.type = 'checkbox';
+  control.id = `field-${key}`;
+  control.setAttribute('data-field-id', key);
+  // Shown by default; only an explicit 'false' seed unchecks it.
+  control.checked = seed[key] !== 'false';
+
+  const labelEl = document.createElement('label');
+  labelEl.textContent = label;
+  labelEl.htmlFor = `field-${key}`;
+
+  // Emit 'true'/'false' so the flag rides the existing string value store.
+  control.addEventListener('input', () => onInput(key, String(control.checked)));
+
+  row.appendChild(control);
+  row.appendChild(labelEl);
+  panel.appendChild(row);
 }
 
 /**

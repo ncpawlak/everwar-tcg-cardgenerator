@@ -36,9 +36,10 @@ to load, the screen shows a clear red error instead of a wrong-looking card.
 | Unit Type, Faction, Species / Tag | The lower tag row. |
 | Abilities (up to 3) | Three ability slots, each with a **name** and a **text** box. The name shows in **bold**, followed by its text, wrapping inside the abilities box. Leave a slot blank to skip it. |
 | Armor bars (0–8) | How many green segments fill the armor bar on the right edge. Type a number 0–8 (default 8). 0 shows the empty recessed track. |
+| Commander / Unique | Checkboxes for the two rarity chips at the top. Both are ticked by default (chips shown); untick one to hide just that chip. |
 
-Everything else (labels like LEVEL/HP, the COMMANDER/UNIQUE chips, all art and the frame)
-is locked and part of the fixed background — it can't be edited in v1.
+Everything else (labels like LEVEL/HP, all art and the frame) is locked and part of the
+fixed background — it can't be edited in v1.
 
 ## Editing
 
@@ -56,6 +57,11 @@ number (0–8). Enter how many green segments you want: `8` fills it (the defaul
 is a single solid bar, and `0` leaves an empty recessed track. This is separate from the
 printed **Armor** stat number. Out-of-range or decimal input is automatically rounded and
 kept within 0–8.
+
+**Commander / Unique chips.** The two chips at the top (COMMANDER and UNIQUE) each have a
+checkbox. Both are ticked by default so the card looks like the template. Untick **Commander**
+or **Unique** to hide that chip; the other one stays exactly where it is (hiding a chip does
+not move the remaining one).
 
 **Long text auto-shrinks.** If you type a name, faction, or stat that's wider than its
 slot, it's automatically condensed (tightened, then scaled down) so it stays on the card

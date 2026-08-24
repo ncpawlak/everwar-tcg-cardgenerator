@@ -589,3 +589,35 @@ Authored numeric control replacing the baked fixed 8-segment bar. Full suite gre
   renderCard (green at N=8 centre, empty at N=0), extractModel (armorBars=8), fieldPanel
   (clamp). Test count 76 -> 89. QA renders armorbar-final-N{0,1,2,3,5,8}.png match the
   Senior's spike proofs.
+
+---
+
+## STORY-16 — Dynamic COMMANDER / UNIQUE chips (user-approved)
+
+Two authored booleans to hide each rarity chip independently. Hide-only (no reflow of the
+remaining chip). Full suite green (96 tests, fidelity 0.914%). Local commit only.
+
+- **MODEL.** New `commander: boolean` and `unique: boolean` (both default **true**) on
+  `CardModel` (src/psd/types.ts), set by `extractModel` and seeded to the flat store by
+  `seedValues` as `'true'/'false'` strings. Authored controls — NOT PSD text layers, NOT in
+  `model.order`. Default true keeps the baked art on screen and the fidelity baseline honest.
+- **CONFIG.** New `src/config/chips.ts` — COMMANDER hide rect `{52,686,222,728}`, UNIQUE hide
+  rect `{220,687,370,728}` (both stop at y=728, above the INFANTRY tag row), and
+  `CHIP_DONOR_STRIP {380,500}`.
+- **RENDER HELPER.** `src/render/patchChip.ts` — pure, unit-tested `computeRowFill` (per-channel
+  median of a donor row) + thin `patchChip(ctx, rect)` glue. For each rect row it takes the
+  median of the donor strip at the same y and writes it via `putImageData` (wholesale pixel
+  replace, alpha included). On this card the donor rail is a transparent frame cutout, so the
+  patch clears the pill to transparent — matching the empty rail slot. `putImageData` (not
+  `fillRect`) is required so a transparent donor actually erases the opaque baked pill.
+- **INTEGRATION.** `renderCard` patches the commander rect when `commander==='false'` and the
+  unique rect when `unique==='false'`, after the background blit (and donor read) and before
+  the armor bar / editable text — live toggles, no re-bake. Default bake path unchanged;
+  both-true → no patch → fidelity 0.914% holds.
+- **UI.** `fieldPanel.ts` appends "Commander" and "Unique" checkboxes (default checked), wired
+  through the existing debounce → re-render, emitting `String(checked)`.
+- **TESTS.** `test/patchChip.test.ts` (median: odd/even/outlier/empty-throws), plus renderCard
+  (chip hidden band differs, other chip + INFANTRY row byte-identical), extractModel
+  (chips default true), fieldPanel (checkboxes exist, default checked, emit true/false).
+  Test count 89 -> 96. QA renders chips-final-{both,no-commander,no-unique,none}.png confirm
+  clean hide with the tag row intact.

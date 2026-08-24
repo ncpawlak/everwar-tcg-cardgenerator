@@ -110,4 +110,39 @@ describe('renderCard', () => {
     expect(g0[1]).toBeLessThan(60);
     expect(Math.abs(g0[1] - g0[0])).toBeLessThan(15);
   });
+
+  // STORY-16 — the COMMANDER/UNIQUE chips are patched out at render time when false.
+  it('hides a chip when its flag is false and leaves the tag row + other chip intact', () => {
+    const psd = readPsdBuffer(readCardPsdBuffer());
+    const model = extractModel(psd);
+    const bg = bakeBackground(psd, { createCanvas: factory });
+
+    // Baseline: both chips shown.
+    const shown = createCanvas(model.width, model.height) as any;
+    const sCtx = shown.getContext('2d');
+    renderCard(sCtx, bg, model, { ...initialValues(model), commander: 'true', unique: 'true' });
+
+    // Commander hidden only.
+    const hidden = createCanvas(model.width, model.height) as any;
+    const hCtx = hidden.getContext('2d');
+    renderCard(hCtx, bg, model, { ...initialValues(model), commander: 'false', unique: 'true' });
+
+    // The COMMANDER text band (~x=90..185, y=698..712) must differ (glyphs erased).
+    const [cx, cy, cw, ch] = [90, 698, 95, 14];
+    const s1 = sCtx.getImageData(cx, cy, cw, ch).data;
+    const h1 = hCtx.getImageData(cx, cy, cw, ch).data;
+    let diff = 0;
+    for (let i = 0; i < s1.length; i += 4) if (Math.abs(s1[i] - h1[i]) > 20) diff++;
+    expect(diff).toBeGreaterThan(30);
+
+    // The UNIQUE chip (x=268..314, y=701..713) is untouched by a commander-only hide.
+    const uS = sCtx.getImageData(268, 701, 46, 12).data;
+    const uH = hCtx.getImageData(268, 701, 46, 12).data;
+    for (let i = 0; i < uS.length; i++) expect(uH[i]).toBe(uS[i]);
+
+    // The INFANTRY tag row below the hide rect (y=745) is untouched too.
+    const rS = sCtx.getImageData(52, 745, 320, 1).data;
+    const rH = hCtx.getImageData(52, 745, 320, 1).data;
+    for (let i = 0; i < rS.length; i++) expect(rH[i]).toBe(rS[i]);
+  });
 });

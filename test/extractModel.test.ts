@@ -94,6 +94,15 @@ describe('extractModel', () => {
     expect(model.fields['armorBars']).toBeUndefined();
   });
 
+  it('defaults the COMMANDER/UNIQUE chip flags to true (STORY-16)', () => {
+    const model = buildModel();
+    expect(model.commander).toBe(true);
+    expect(model.unique).toBe(true);
+    // Authored flags — never field entries.
+    expect(model.order).not.toContain('commander');
+    expect(model.order).not.toContain('unique');
+  });
+
   it('throws loudly when an allow-list layer name is missing', () => {
     const psd = readPsdBuffer(readCardPsdBuffer());
     const bogus = [

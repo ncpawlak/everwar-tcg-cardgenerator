@@ -94,6 +94,13 @@ export interface CardModel {
    * a field entry (not in `order`/`fields`) — it is drawn dynamically over the background.
    */
   armorBars: number;
+  /**
+   * Show the COMMANDER chip (STORY-16). Default true keeps the baked pill visible; false
+   * patches it out at render time. Authored flag — not a PSD field, not in `order`.
+   */
+  commander: boolean;
+  /** Show the UNIQUE chip (STORY-16). Default true; false patches it out at render time. */
+  unique: boolean;
 }
 
 /** Narrowing helper — true for the abilities field. */

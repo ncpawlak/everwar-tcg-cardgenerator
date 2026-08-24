@@ -225,6 +225,39 @@ right after the background blit and before editable text. The pure segment math 
 with `patchArmorBar:false` and omits the `armorBars` key so it compares against the PSD's
 own baked bar (0.914% holds).
 
+### 4.8 Dynamic COMMANDER / UNIQUE chips (STORY-16, user-approved)
+
+The upper tag rail shows two rarity chips — **COMMANDER** and **UNIQUE**. Each is toggled
+independently by an **authored boolean** (`commander`, `unique`, both **default true**).
+Default true keeps the template's baked art on screen unchanged and keeps the fidelity
+baseline honest. This is **hide-only**: hiding one chip does NOT reflow the other
+(product-approved).
+
+**Why a patch, not a layer skip.** The pill capsules are baked into a single broad raster
+(`Layer 3`, bounds `{20,686}–{670,979}`) together with the rail; the `COMMANDER` / `UNIQUE`
+text sit in separate text layers on top. There is no independent pill layer to hide, so a
+chip is removed by **painting over its rect after compositing**.
+
+**Hide mechanism (render-time).** `src/render/patchChip.ts` overwrites the chip rect using a
+per-row **median** of a stable no-chip donor strip (`CHIP_DONOR_STRIP {380,500}`) sampled
+from the current canvas. On this card that donor rail is a **transparent frame cutout**, so
+the reconstruction correctly clears the pill to transparent — matching the empty rail slot
+to the right of the chips. Because the donor is (mostly) transparent, the patch is applied
+with `putImageData` (a wholesale pixel **replace**, alpha included), not a `fillRect`
+alpha-blend which would paint nothing over the opaque pill. The median reduction
+(`computeRowFill`) is a pure, unit-tested function.
+
+**Geometry (measured from the PSD).** COMMANDER hide rect `{52,686}–{222,728}`; UNIQUE hide
+rect `{220,687}–{370,728}`. Both stop at `y=728`, above the INFANTRY / faction tag row
+(~y=736+), so that row is never touched.
+
+**Integration & fidelity.** `renderCard` patches the commander rect when `commander==='false'`
+and the unique rect when `unique==='false'`, right after the background blit (and the chip
+donor read) and before the armor bar / editable text — so checkbox toggles are live with no
+re-bake. The default bake path is unchanged; with both flags true no patch runs, so the
+**fidelity baseline** still compares against the PSD composite with both chips present
+(0.914% holds).
+
 ### 4.4 Fidelity notes
 
 - Fonts are the hard dependency and are now satisfied (bundled). Do not silently
