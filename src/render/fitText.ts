@@ -24,6 +24,33 @@ export const MAX_TRACK_RATIO = 0.08;
  */
 export const SINGLE_LINE_WIDTH_ALLOWANCE = 1.15;
 
+/**
+ * TITLE FIT BOX — inner-right edge (card x, in the 690×1020 space) of the black title
+ * bar, i.e. how far the title is allowed to extend before the LEVEL module begins.
+ *
+ * The title is unlike the other single-line fields: its slot is the wide dark bar it
+ * sits on, NOT its tight ink bounds. Deriving the width from ink bounds made the title
+ * condense far too early (well left of the bar edge). This value was MEASURED from the
+ * PSD composite (`assets/Card_1.psd` → `psd.canvas`, 690×1020): scanning luminance
+ * across the title rows, the black bar interior stays dark (lum≈0–14) until x≈519, then
+ * a bright metallic bevel (lum≈190–250) at x≈521–523 marks the divider to the angled
+ * LEVEL panel. We stop at 512 — ≈7px inside that edge — so glyphs never kiss/overlap
+ * the LEVEL module. Documented in `.project/spec.md` §4.5.
+ */
+export const TITLE_BAR_INNER_RIGHT_X = 512;
+
+/**
+ * Available width for the TITLE, measured from its left baseline anchor to the title
+ * bar's inner-right edge (TITLE_BAR_INNER_RIGHT_X). The title renders at native size
+ * until it reaches this edge, then shrinks (see `layoutTitle`). Pure + testable.
+ */
+export function titleAvailableWidth(
+  anchorX: number,
+  barInnerRightX: number = TITLE_BAR_INNER_RIGHT_X,
+): number {
+  return barInnerRightX - anchorX;
+}
+
 /** The result of fitting a run of text into an available width. */
 export interface Fit {
   /** Font-size multiplier in (MIN_SCALE .. 1]. */

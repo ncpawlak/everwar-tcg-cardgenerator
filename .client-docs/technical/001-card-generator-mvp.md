@@ -78,9 +78,13 @@ src/
   PSD's transparent regions.
 - **Single-line shrink-to-fit** (`fitText.ts`) — long edits never overflow: condense
   tracking (≤8%/gap) first, then scale the font down (floored 0.6×). The slot width is
-  the field's PSD layer bounds × 1.15 (single-line); the title scales both small-caps
-  runs by one factor (ratio preserved) and the authored title never shrinks. Pure and
-  measurer-injected, so it is canvas-free unit-testable (spec §4.5).
+  the field's PSD layer bounds × 1.15 for single-line values; the **title** uses the
+  black title bar's width instead (`titleAvailableWidth` = `TITLE_BAR_INNER_RIGHT_X`
+  512 − anchor.x ≈ 442px, the bar edge measured from the PSD composite) so it only
+  condenses when it actually reaches the bar edge, not its tight ink bounds. The title
+  scales both small-caps runs by one factor (ratio preserved) and the authored title
+  never shrinks. Pure and measurer-injected, so it is canvas-free unit-testable
+  (spec §4.5).
 
 ## Tests (Vitest — 59 tests, all green)
 

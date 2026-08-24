@@ -6,7 +6,7 @@
 import type { FieldModel, Rgb } from '../psd/types';
 import { isAbilities } from '../psd/types';
 import { layoutTitle, type Measure } from './layoutTitle';
-import { layoutSingleLine, SINGLE_LINE_WIDTH_ALLOWANCE } from './fitText';
+import { layoutSingleLine, SINGLE_LINE_WIDTH_ALLOWANCE, titleAvailableWidth } from './fitText';
 import { wrapText } from './wrapText';
 
 /** A 2D context we can draw text on (DOM or napi). Typed loosely for cross-env use. */
@@ -93,7 +93,9 @@ export function drawText(ctx: Ctx2D, field: FieldModel, value: string): void {
 
   if (field.kind === 'title') {
     // Per-run small-caps: baseline anchored at the engine transform. Edited titles
-    // shrink uniformly to fit the dark bar (proxied by the layer bounds width).
+    // shrink uniformly to fit the black TITLE BAR — its available width spans from the
+    // title's left anchor to the bar's inner-right edge (titleAvailableWidth), NOT the
+    // tight ink bounds (which shrank the title far too early, left of the bar edge).
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     const ops = layoutTitle(
@@ -102,7 +104,7 @@ export function drawText(ctx: Ctx2D, field: FieldModel, value: string): void {
       field.font,
       field.anchor,
       ctxMeasure(ctx),
-      layerWidth(field),
+      titleAvailableWidth(field.anchor.x),
     );
     for (const op of ops) {
       ctx.font = op.font;

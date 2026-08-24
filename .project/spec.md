@@ -139,11 +139,24 @@ The **title** uses font-scaling only (no tracking) and scales **both** small-cap
 runs by the same factor, preserving the authored initial-cap / body size ratio.
 
 **Available slot width.** The PSD gives no explicit container width for these fields,
-so the slot is derived from each field's **PSD layer bounds** (the rendered ink
-extent). Single-line fields add a **1.15× allowance** because the authored values
-measure up to ~9% wider than their tight bounds (glyph side-bearings); this keeps the
-original card pixel-identical while still catching genuinely-too-long edits. The
-authored title (whose `styleRuns` still cover the text) is **never** shrunk, so the
+so the slot is derived per field:
+
+- **Single-line values** (stats, faction, tags, species) use the field's **PSD layer
+  bounds** (rendered ink extent) plus a **1.15× allowance**, because the authored
+  values measure up to ~9% wider than their tight bounds (glyph side-bearings); this
+  keeps the original card pixel-identical while still catching genuinely-too-long edits.
+- **Title (`Name text`)** uses the **width of the black title bar** it sits on — NOT
+  its tight ink bounds. The slot spans from the title's left baseline anchor
+  (x≈69.63) to the bar's inner-right edge at **x=512** (`TITLE_BAR_INNER_RIGHT_X`),
+  giving ≈442px. That edge was MEASURED from the PSD composite (`assets/Card_1.psd`
+  → `psd.canvas`, 690×1020): scanning luminance across the title rows, the black bar
+  interior stays dark until x≈519, then a bright metallic bevel (x≈521–523) marks the
+  divider to the angled LEVEL panel; 512 leaves ≈7px padding so glyphs never touch the
+  LEVEL module. Deriving the title slot from ink bounds made it condense far too early
+  (well left of the bar edge) — the bar width fixes that so the title renders at native
+  size until it actually reaches the bar edge, then shrinks.
+
+The authored title (whose `styleRuns` still cover the text) is **never** shrunk, so the
 baked baseline / fidelity render is unaffected. This logic lives in the pure,
 measurer-injected layout core (`src/render/fitText.ts`, `layoutTitle.ts`) and is
 unit-tested without a canvas.

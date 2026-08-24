@@ -111,3 +111,16 @@ never "should pass."
   (`createLivePreview`) with an injectable renderer, enabling an integration test of
   the edit -> debounce -> single re-render loop. `main.ts` now delegates to it.
 - Test count 46 -> 59, all green; build + lint clean. No push (Gate 2.5 is the user's).
+
+- **Title fit box corrected (post-Gate-2 user feedback).** The title's shrink slot was
+  derived from tight ink bounds and condensed the title well left of the actual bar
+  edge. Fixed by deriving the title's available width from the **black title bar**
+  instead: `TITLE_BAR_INNER_RIGHT_X = 512` (a documented constant in `fitText.ts`) and
+  `titleAvailableWidth(anchorX) = 512 - anchorX` (≈442px). The 512 edge was MEASURED
+  from the PSD composite (`psd.canvas`): the black bar interior stays dark until x≈519,
+  a metallic bevel to the LEVEL panel spikes at x≈521-523, so 512 leaves ~7px padding.
+  Only the TITLE branch of `drawText.ts` changed (now passes `titleAvailableWidth` in
+  place of `layerWidth`); single-line fields keep their ink-bounds x1.15 slot. Tests
+  added to `fitText.test.ts` (bar-based width, not ink width) and `layoutTitle.test.ts`
+  (medium title at native scale=1; extreme still shrinks to <= available). Test count
+  59 -> 64, all green; build + lint clean.

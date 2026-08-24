@@ -3,6 +3,7 @@
 // text.length * fontSizePx * k so widths are deterministic.
 import { describe, it, expect } from 'vitest';
 import { layoutTitle } from '../src/render/layoutTitle';
+import { titleAvailableWidth } from '../src/render/fitText';
 import type { StyleRun } from '../src/psd/types';
 
 const FAMILY = 'Square721BT-BoldCondensed';
@@ -98,5 +99,33 @@ describe('layoutTitle', () => {
     const ops = layoutTitle('IRONFIST COMMANDER', runs, FAMILY, ANCHOR, measure, 10);
     expect(parseFloat(ops[0].font)).toBeCloseTo(45.83, 2);
     expect(parseFloat(ops[1].font)).toBeCloseTo(37.5, 2);
+  });
+
+  // Title-bar-width fix — the title fits against the black bar width, not ink bounds.
+  it('renders a medium edited title within the bar at native size (scale = 1)', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const avail = titleAvailableWidth(ANCHOR.x); // ≈ 442.37 (bar-based)
+    // "IRON WAR" native width via the stub measurer ≈ 158px — well within the bar.
+    const ops = layoutTitle('IRON WAR', runs, FAMILY, ANCHOR, measure, avail);
+    // No shrink: the big/small runs keep their authored sizes.
+    expect(parseFloat(ops[0].font)).toBeCloseTo(45.83, 2); // 'I' big cap
+    expect(parseFloat(ops[1].font)).toBeCloseTo(37.5, 2); // 'RON' small
+  });
+
+  it('still shrinks an extreme title to fit the bar width', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const avail = titleAvailableWidth(ANCHOR.x); // ≈ 442.37
+    // 24-char single word: native ≈ 454px > bar → must shrink to fit.
+    const ops = layoutTitle('AAAAAAAAAAAAAAAAAAAAAAAA', runs, FAMILY, ANCHOR, measure, avail);
+    expect(parseFloat(ops[0].font)).toBeLessThan(45.83); // actually shrank
+    const last = ops[ops.length - 1];
+    const totalWidth = last.x - ANCHOR.x + measure(last.text, last.font);
+    expect(totalWidth).toBeLessThanOrEqual(avail + 1e-6);
   });
 });

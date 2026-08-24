@@ -523,3 +523,13 @@ Applied after both Gate 2 reviews signed off; full suite kept green (59 tests).
   edit -> debounce -> exactly one text-only re-render (fake timers, injected renderer).
 - **FIX-3 — Preview shell smoke test.** `test/preview.test.ts` asserts `buildLayout`
   builds the shell + a 690x1020 canvas with a 2D context.
+
+- **FIX-4 — Title fit box = title bar width (user feedback, see `spec.md` §4.5).**
+  The TITLE was condensing far too early because its slot was derived from tight ink
+  bounds (~341px x1.15). Corrected: the title's available width now spans from its left
+  anchor (x≈69.63) to the black title bar's inner-right edge, `TITLE_BAR_INNER_RIGHT_X
+  = 512` (measured from the PSD composite; bar interior ends ~x519, metallic bevel to
+  the LEVEL panel at ~x521-523, 512 leaves ~7px padding) → ≈442px. Only the TITLE's
+  available-width source changed (`titleAvailableWidth` in `fitText.ts`, wired in
+  `drawText.ts`); single-line fields untouched. Tests added in `test/fitText.test.ts`
+  and `test/layoutTitle.test.ts`. Full suite green (64 tests).
