@@ -9,7 +9,7 @@
 // Run via:  npm run batch -- --input <xlsx> --sheet "full Set Table v2 - stat adjust" --out <dir>
 // (This module is Node-only — it imports @napi-rs/canvas via nodeCanvas and must never be
 // pulled into the Vite browser bundle.)
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as XLSX from 'xlsx';
 import { readPsd } from 'ag-psd';
@@ -62,7 +62,15 @@ export function parseArgs(argv: string[]): CliOptions {
  * default to '' so downstream fail-loud checks see "missing", not `undefined` surprises.
  */
 export function readSheetRows(file: string, sheet: string): RawRow[] {
-  const wb = XLSX.readFile(file);
+  // Fail-loud with a clear message before touching the parser.
+  if (!existsSync(file)) {
+    throw new Error(`Input file not found: ${file}`);
+  }
+  // Read the bytes ourselves and parse the buffer. The SheetJS ESM build (`xlsx.mjs`)
+  // does NOT auto-bind Node's `fs`, so `XLSX.readFile` throws "Cannot access file …"
+  // under vite-node. Parsing an in-memory buffer sidesteps the fs-binding issue.
+  const buf = readFileSync(file);
+  const wb = XLSX.read(buf, { type: 'buffer' });
   const ws = wb.Sheets[sheet];
   if (!ws) {
     throw new Error(
@@ -125,8 +133,18 @@ function main(): void {
       const abilities = abilitiesFromValues(merged);
       const of = detectAbilitiesOverflow(abilities, abilitiesField, measure);
       if (of.overflow) {
+        // `clippedAbilityIndex` is an index into the NON-EMPTY abilities, not the
+        // spreadsheet Ability column. Map it back to the original slot (Ability 1/2/3)
+        // using the SAME blank-skip rule as layoutAbilities so the message names the
+        // real column even when an earlier Ability cell was left blank.
+        const nonEmptySlots = abilities
+          .map((a, i) => ({ a, slot: i + 1 }))
+          .filter(({ a }) => a.name.trim().length > 0 || a.body.trim().length > 0)
+          .map(({ slot }) => slot);
         const which =
-          of.clippedAbilityIndex !== undefined ? ` (ability ${of.clippedAbilityIndex + 1})` : '';
+          of.clippedAbilityIndex !== undefined
+            ? ` (Ability ${nonEmptySlots[of.clippedAbilityIndex]})`
+            : '';
         errors.push(
           `${label}: abilities overflow the box even at min scale ${of.scale}${which} — shorten ability text`,
         );
@@ -174,4 +192,7 @@ function main(): void {
   console.log(`\nWrote ${validCards.length} card PNG(s) + manifest.json to ${opts.out}`);
 }
 
-main();
+// Only run the pipeline when invoked as the CLI — importing this module from tests (to
+// exercise `readSheetRows`/`parseArgs`) must NOT auto-run. Vitest sets `VITEST`, so we skip
+// there; every other invocation (the `batch` script via vite-node, or `node`) runs main().
+if (process.env.VITEST === undefined) main();

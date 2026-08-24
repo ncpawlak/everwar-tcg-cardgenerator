@@ -9,3 +9,5 @@ coverage/
 
 # Disposable spike / POC scratch (kept local, out of the repo)
 spike/
+
+batch-output/
