@@ -20,6 +20,33 @@
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] — 2026-08-24
+
+Card Generator feature release: dynamic frame elements, automatic title casing, and
+spreadsheet-driven batch generation with incremental re-rendering. Reviewer PASS,
+145/145 tests green, fidelity 0.914%.
+
+### Added
+- **Batch generation from spreadsheet (STORY-17)** — a Node CLI (`npm run batch -- --input <xlsx> --sheet "<name>" --out <dir>`) that reads the Hero rows, maps each to card values, and renders every card through the shared production pipeline (bake once + `renderCard` per row), writing one PNG per card plus a `manifest.json`. Pure, unit-tested `src/batch/` modules: `mapRow` (row→values+manifest with multi-error collection), `filename` (slug + collision suffix), `overflow` (abilities-overflow detector), `nodeCanvas` (napi/font/PSD bootstrap), thin `cli` glue. Fail-loud: a full validation pass (field errors + abilities overflow attributed to the offending Ability slot) runs first; any error prints all problems and exits non-zero writing nothing. Added `xlsx` dep; promoted `@napi-rs/canvas` to `dependencies`.
+- **Incremental batch mode (STORY-18)** — opt-in `--incremental` diffs the sheet against the prior `<out>/manifest.json` and re-renders only CHANGED + NEW cards; `--dry-run` prints the plan and writes nothing. Pure fs-free planner `src/batch/incremental.ts` keys identity on `name.trim()` and compares a fixed-shape canonical fingerprint over all fields except `file` (sheet noise like `240.0`→`240`, case/whitespace, `"1"`→`true` normalizes to no-change). Retained cards keep their filename; NEW files are allocated collision-safe only after reserving retained names; the manifest is written last for crash-safety.
+- **Archive-not-delete** — superseded (CHANGED) and removed (REMOVED) cards' prior PNGs are moved to a versioned `<out>/archive/<stem>-<compactUTC>.png` instead of being deleted; the `archive/` subfolder is excluded from the existing-PNG scan.
+- **Dynamic COMMANDER/UNIQUE chips (STORY-16)** — per-card checkboxes hide the baked chip pills via donor-strip reconstruction (`src/config/chips.ts`, `src/render/patchChip.ts`); default shown so fidelity stays honest.
+
+### Changed
+- **Automatic small-caps title casing (STORY-16b/16c)** — edited titles now render true all-caps with an enlarged first glyph per word (matching the template), while authored titles are left untouched. Dispatch is by exact match against the authored text (`authoredText?` param) instead of string length, fixing a collision where 8 of 50 Hero names were exactly 18 chars and would have mis-routed to mixed-case.
+
+### Fixed
+- **Batch xlsx read under vite-node (STORY-17a)** — the SheetJS ESM build doesn't auto-bind Node `fs`, so `XLSX.readFile` threw; now reads bytes with `readFileSync` and parses the buffer with `XLSX.read`.
+- **Batch baked a transparent frame (STORY-17b)** — the CLI read the PSD with `readPsd(..., {useImageData:true})`, populating layer `.imageData` instead of `.canvas`, so `bakeBackground` composited nothing and every card rendered as a blank frame. Now loads via the app's `readPsdBuffer`. Strengthened the smoke test to assert opaque frame pixels + a transparent interior cutout (the old "buffer non-empty" check couldn't catch this).
+
+---
+
+## [0.1.1] — 2026-08-24
+
+First versioned card-generator baseline (MVP + structured abilities), previously logged under Unreleased.
+
 ### Added
 - **EverWar TCG Card Generator MVP** — Vite + TypeScript local browser app using `ag-psd` for PSD reads, a cached baked background, canvas-rendered editable text, live preview, and PNG export. Includes 9 layer-backed editable text fields plus authored abilities, strict allow-list extraction, FontFace loading for Square721BT, File System Access export with fallback, and headless fidelity coverage.
 - **Structured abilities (Variant D)** — Replaced the single free-text abilities field with up to 3 `{name, body}` ability rows. Ability names render inline in Square721BT-BoldCondensed, bodies render in Square721BT-RomanCondensed, mixed-weight lines wrap inside the box, blank/partial slots are skipped gracefully, and a dormant shrink-to-fit fallback preserves overflow safety.
