@@ -71,6 +71,53 @@ describe('layoutTitle', () => {
     expect(parseFloat(two[0].font)).toBeGreaterThan(parseFloat(two[1].font));
   });
 
+  // STORY-16c — an 18-char EDITED title (same length as the authored runs total) must
+  // still take the small-caps uppercasing path, not the authored mixed-case slicing.
+  it('routes a same-length edited title to small-caps when authoredText differs', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ]; // authored runs total length 18
+    // "Devil Dog Rifleman" is 18 chars — equal to the authored total — but it is EDITED
+    // (differs from the authored "IRONFIST COMMANDER"), so it must render true small-caps.
+    const ops = layoutTitle(
+      'Devil Dog Rifleman',
+      runs,
+      FAMILY,
+      ANCHOR,
+      measure,
+      Infinity,
+      'IRONFIST COMMANDER',
+    );
+    expect(ops.map((o) => o.text)).toEqual(['D', 'EVIL', ' ', 'D', 'OG', ' ', 'R', 'IFLEMAN']);
+    // First op is a big uppercase initial; its tail is uppercased.
+    expect(ops[0].text).toBe('D');
+    expect(parseFloat(ops[0].font)).toBeGreaterThan(parseFloat(ops[1].font));
+    expect(ops[1].text).toBe('EVIL');
+  });
+
+  it('keeps the unchanged authored title on the authored path (fidelity unaffected)', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    // value === authoredText → authored slicing, mixed-case preserved (no uppercasing).
+    const ops = layoutTitle(
+      'IRONFIST COMMANDER',
+      runs,
+      FAMILY,
+      ANCHOR,
+      measure,
+      Infinity,
+      'IRONFIST COMMANDER',
+    );
+    expect(ops.map((o) => o.text)).toEqual(['I', 'RONFIST ', 'C', 'OMMANDER']);
+  });
+
   it('handles a single word', () => {
     const runs: StyleRun[] = [{ length: 1, fontSize: 45.83 }];
     const ops = layoutTitle('X', runs, FAMILY, ANCHOR, measure);

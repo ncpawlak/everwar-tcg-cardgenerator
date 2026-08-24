@@ -73,6 +73,9 @@ export function drawText(ctx: Ctx2D, field: LayerFieldModel, value: string): voi
       field.anchor,
       ctxMeasure(ctx),
       titleAvailableWidth(field.anchor.x),
+      // STORY-16c — pass the original captured title so ONLY the unchanged authored value
+      // uses the authored runs; any edited value renders as true small-caps (uppercased).
+      field.text,
     );
     for (const op of ops) {
       ctx.font = op.font;

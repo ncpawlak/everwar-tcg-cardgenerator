@@ -89,6 +89,14 @@ function segmentsSmallCaps(text: string, runs: StyleRun[]): Segment[] {
  * sizes shrink by the same factor — preserving the initial-cap / body ratio — floored
  * at MIN_SCALE for readability. The authored PSD title (runs cover the text) is never
  * shrunk, so the baked baseline / fidelity render is unaffected.
+ *
+ * STORY-16c — authored-vs-edited dispatch. Deciding "authored" purely by run-length
+ * coverage is unsafe: some edited titles happen to have the same length as the authored
+ * runs total (e.g. 18-char names vs "IRONFIST COMMANDER") and would wrongly render at the
+ * authored mixed-case boundaries instead of true small-caps. When `authoredText` is
+ * provided, a title is treated as authored ONLY when it is byte-identical to that captured
+ * original; any other value takes the small-caps (uppercased) path. When `authoredText` is
+ * omitted the legacy length-based behavior is preserved for backward-compatibility.
  */
 export function layoutTitle(
   text: string,
@@ -97,12 +105,18 @@ export function layoutTitle(
   anchor: Anchor,
   measure: Measure,
   availableWidth = Infinity,
+  authoredText?: string,
 ): TitleDrawOp[] {
   if (text.length === 0) return [];
 
+  // Authored (PSD) title dispatch. If the caller told us the original captured text, only
+  // the unchanged authored title uses its explicit runs; everything else is edited. Absent
+  // that hint, fall back to the legacy rule: runs whose lengths exactly cover the text.
   const runsCoverText =
-    styleRuns.length > 0 &&
-    styleRuns.reduce((sum, r) => sum + r.length, 0) === text.length;
+    authoredText !== undefined
+      ? text === authoredText
+      : styleRuns.length > 0 &&
+        styleRuns.reduce((sum, r) => sum + r.length, 0) === text.length;
 
   const segments = runsCoverText
     ? segmentsFromRuns(text, styleRuns)
