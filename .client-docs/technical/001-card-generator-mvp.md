@@ -96,7 +96,7 @@ src/
   never shrinks. Pure and measurer-injected, so it is canvas-free unit-testable
   (spec §4.5).
 
-## Tests (Vitest — 59 tests, all green)
+## Tests (Vitest — 76 tests, all green)
 
 - Pure logic (node env): `config`, `loadFonts` (jsdom), `layoutTitle`, `wrapText`,
   `fitText`, `appState`, `fieldPanel` (jsdom), `livePreview` (jsdom), `preview` (jsdom),
@@ -106,7 +106,7 @@ src/
 - **Fidelity gate** (`fidelity.test.ts`): renders the original PSD values and diffs
   against `psd.canvas`. Tolerance = per-pixel colour delta 60 (sum |ΔRGB|), max 3%
   mismatched pixels — absorbs sub-pixel metric kerning but catches gross regressions.
-  Current baseline: **0.91% mismatch, mean abs error 0.81**. Also asserts the
+  Current baseline: **0.914% mismatch, mean abs error 0.81**. Also asserts the
   small-caps invariant and the abilities clip.
 
 ## Scripts

@@ -1,15 +1,14 @@
 # Current Architecture
 
-**Status:** APPROVED STACK — pre-implementation (Gate 1.5 taskboard produced; no app
-code written yet). Spec is user-approved; build plan recorded in
-`architecture-log/2026-08-23-build-plan-taskboard.md`; stories in
-`.project/taskboard/001-card-generator-mvp.md`.
+**Status:** IMPLEMENTED — MVP + post-review fixes + structured abilities complete on
+`npawlakel-psd-card-editor`. Reviewer PASS; 76 tests green; fidelity 0.914%. Branch is
+committed locally and not pushed; next phase is Gate 2.5 push + PR.
 
-This is a fresh downstream product repo. Harness scaffolding (`.agent`, `.project`,
-`.client-docs`, README, CHANGELOG) plus input assets exist:
-`assets/Card_1.psd` (690x1020) and `assets/fonts/*.otf` (two Square721BT faces). A
-disposable proof-of-concept lives in `spike/` (Node + `@napi-rs/canvas`) - it is not
-shipped. No application `src/`, dependencies, or build config exist yet.
+This downstream product repo now ships the local browser card editor under `src/` plus
+Vite/Vitest/ESLint configuration. Harness scaffolding (`.agent`, `.project`,
+`.client-docs`, README, CHANGELOG) and input assets remain in place:
+`assets/Card_1.psd` (690x1020) and `assets/fonts/*.otf` (two Square721BT faces). Spike
+scripts remain disposable/reference-only and are not shipped.
 
 ## Approved stack
 
@@ -32,11 +31,12 @@ shipped. No application `src/`, dependencies, or build config exist yet.
 No open-source PSD library re-renders edited type layers. We re-render editable text
 ourselves and bake all other layers. Proven near pixel-parity in the spike.
 
-## Planned source structure
+## Source structure
 
-Root app; `src/` = `config/` (editable allow-list), `psd/` (loadPsd, extractModel,
-types), `fonts/` (loadFonts), `render/` (bakeBackground, layoutTitle, wrapText,
-drawText, renderCard), `state/` (appState), `ui/` (fieldPanel, preview), `export/`
+Root app; `src/` = `config/` (editable allow-list + ability geometry), `psd/` (loadPsd,
+extractModel, types), `fonts/` (loadFonts), `render/` (bakeBackground, layoutTitle,
+fitText, wrapText, abilitiesLayout, drawText, drawAbilities, renderCard), `state/`
+(appState), `app/` (livePreview, seedValues), `ui/` (fieldPanel, preview), `export/`
 (exportPng), `main.ts` root. Full tree + rationale in the build-plan log and taskboard.
 
 ## Settled build decisions (see build-plan log for detail)
@@ -50,6 +50,11 @@ drawText, renderCard), `state/` (appState), `ui/` (fieldPanel, preview), `export
 5. `CardModel` is plain/serializable - no live canvas refs.
 6. Fidelity regression test diffs render-of-original vs `psd.canvas` within a
    documented tolerance.
+7. ABILITIES badge removal is an interior-only opaque-black patch in `bakeBackground`
+   (`removeAbilitiesBadge` default true); no border/donor reconstruction is required.
+8. Structured abilities are one model field but six flat UI/state keys
+   (`ability{1..3}-name/-body`), rendered through pure mixed-weight layout with bold
+   inline names and regular bodies.
 
 ## Reused spike facts (do not re-derive)
 
@@ -57,9 +62,10 @@ drawText, renderCard), `state/` (appState), `ui/` (fieldPanel, preview), `export
   lengths `[1, 8, 1, 8]`; baseline transform ~ `(69.63, 75.92)`; advance x by measured
   run width. Never assume one size per layer.
 - `layer.opacity` is a 0-1 float - never divide by 255.
-- ABILITIES body region (authored, no PSD layer): content box `(37,808)-(664,968)`,
-  padded text area `x=59, y=824, w=583`, Square721BT-RomanCondensed, 21px / 25px
-  line-height, white, clipped to box bottom.
+- ABILITIES body region (authored, no PSD layer): badge-removed interior
+  `(37,771)-(664,971)`, padded text area `x=59, y=780, w=583`, Square721BT-RomanCondensed
+  body + Square721BT-BoldCondensed names, 21px / 25px line-height, clipped to box bottom,
+  with dormant whole-block shrink floor 0.7x.
 - Blend modes all `normal`, no layer effects -> back-to-front `drawImage` bake is exact.
 
 ## Known constraints / risks

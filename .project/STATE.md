@@ -10,13 +10,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Current phase / gate** | Gate 2 — Coder TDD implementation (13-story taskboard) |
+| **Current phase / gate** | Gate 3 close-out complete — awaiting Gate 2.5 push + PR |
 | **Active branch** | `npawlakel-psd-card-editor` |
-| **In-flight** | Coder building EverWar TCG Card Generator per `.project/taskboard/001-card-generator-mvp.md` |
-| **Last milestone** | Gate 1 spec approved; Gate 1.5 taskboard written (13 TDD stories, src/ structure, inject-measurer test strategy) |
-| **Blocked on** | Nothing — Coder implementing |
-| **Next up** | Senior Coder architectural review → Reviewer QA + visual verification → Gate 2.5 push approval |
-| **Last updated** | 2026-08-23 — Orchestrator |
+| **In-flight** | MVP + badge removal + structured 3-ability feature COMPLETE; dev server running on :5180; branch committed locally, not pushed |
+| **Last milestone** | Reviewer PASS after STORY-14; 76/76 tests green; fidelity 0.914% |
+| **Blocked on** | Gate 2.5 user approval to push and open PR |
+| **Next up** | Gate 2.5 push + PR |
+| **Last updated** | 2026-08-24 — Learner |
 
 ## Notes
 - The Orchestrator owns this file. If it's stale, resumption and `boot` degrade —

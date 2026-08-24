@@ -6,3 +6,6 @@ coverage/
 *.db-wal
 .env
 .env.local
+
+# Disposable spike / POC scratch (kept local, out of the repo)
+spike/

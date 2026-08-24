@@ -21,6 +21,8 @@
 ## [Unreleased]
 
 ### Added
+- **EverWar TCG Card Generator MVP** — Vite + TypeScript local browser app using `ag-psd` for PSD reads, a cached baked background, canvas-rendered editable text, live preview, and PNG export. Includes 9 layer-backed editable text fields plus authored abilities, strict allow-list extraction, FontFace loading for Square721BT, File System Access export with fallback, and headless fidelity coverage.
+- **Structured abilities (Variant D)** — Replaced the single free-text abilities field with up to 3 `{name, body}` ability rows. Ability names render inline in Square721BT-BoldCondensed, bodies render in Square721BT-RomanCondensed, mixed-weight lines wrap inside the box, blank/partial slots are skipped gracefully, and a dormant shrink-to-fit fallback preserves overflow safety.
 - **Fleet mode (auto-scaled parallel execution)** — the Orchestrator now automatically decides whether to run a fleet of parallel Coder ↔ Reviewer loops based on the work: engaged for large *and* shardable tasks (codebase deep-dive, large Finalize, broad refactor/migration, test backfill, multi-repo propagation), single-track for small or tightly-coupled work. Uses exclusive per-loop file ownership (conflict prevention by partition), proportional concurrency, and draft-PR-only rails (never merges). New `.agent/skills/fleet.md`, "Fleet Mode" section in `agents.md`, Constraint #25, Orchestrator routing row + "Automatic Fleet Scaling" section, README "Automatic Behaviors", and a fleet-economics note in `model-config.md`.
 - `.project/STATE.md` — a live "where are we" snapshot (current gate, in-flight story, branch, last milestone) the Orchestrator maintains and `boot` reads first, so context recovery is instant instead of reconstructed from git log.
 - `.agent/tools/harness-check.mjs` — a zero-dependency, cross-platform integrity checker (mode↔routing parity, skill frontmatter, referenced-path existence, contiguous constraint numbering). Wired into Boot and Nightwatch.
@@ -28,9 +30,14 @@
 - Categorized index over the Constraints list (by theme) without renumbering, so references stay stable as the list grows.
 
 ### Changed
+- **Abilities box layout** — Removed the baked ABILITIES badge from the static background with an opaque black patch over its interior-only rect `{left:33,top:771,right:254,bottom:816}` and reclaimed the freed vertical space by raising authored ability text from y=824 to y=780 (usable height 144px → 191px).
 - Finalize now treats **security** as a first-class audit dimension (injection, authz, secrets, unsafe deserialization, SSRF/path-traversal, supply-chain, sensitive-data exposure) in both `agents.md` and the Senior Coder role — was a single thin bullet.
 - Skill auto-load scan now explicitly **excludes `README.md`** (it documents the format; it is not a loadable skill) in Constraint #4 and the skills README.
 - Fixed the stale README structure diagram (removed a dead `.agent/vision/` path; added `.project/vision.md`, `STATE.md`, `backlog/`, and `.agent/tools/`).
+
+### Fixed
+- **Text fit resilience** — Added single-line shrink-to-fit and preview composition coverage, then corrected title fitting to use the title-bar inner-right edge (`x=512`) instead of tight title ink bounds so titles only shrink when they reach the actual slot edge.
+- **Gate 3 validation snapshot** — Reviewer PASS, 76 tests green, and fidelity remains **0.914%** versus the PSD composite.
 
 ---
 
