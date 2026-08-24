@@ -52,6 +52,12 @@ function segmentsFromRuns(text: string, runs: StyleRun[]): Segment[] {
  * the first glyph of each whitespace-delimited word is drawn large, the rest small;
  * whitespace runs are drawn small. Big/small sizes are inferred from the styleRuns
  * (max = initial-cap size, min = body size), falling back to the PSD defaults.
+ *
+ * STORY-16b — the template's title style is TRUE small-caps: every letter is uppercase,
+ * only the initial of each word is larger. So we uppercase BOTH the big initial and the
+ * small tail here, making edited/batch titles all-caps automatically (e.g. "Goliath" →
+ * "G"+"OLIATH"). Whitespace tokens are left untouched. This only affects the edited-text
+ * path; the authored PSD title (segmentsFromRuns) is unchanged, so fidelity is unaffected.
  */
 function segmentsSmallCaps(text: string, runs: StyleRun[]): Segment[] {
   const sizes = runs.map((r) => r.fontSize).filter((s) => s > 0);
@@ -65,8 +71,9 @@ function segmentsSmallCaps(text: string, runs: StyleRun[]): Segment[] {
       segments.push({ text: token, size: small });
       continue;
     }
-    segments.push({ text: token[0], size: big });
-    if (token.length > 1) segments.push({ text: token.slice(1), size: small });
+    // Uppercase the large initial glyph and the smaller tail → true small-caps.
+    segments.push({ text: token[0].toUpperCase(), size: big });
+    if (token.length > 1) segments.push({ text: token.slice(1).toUpperCase(), size: small });
   }
   return segments;
 }

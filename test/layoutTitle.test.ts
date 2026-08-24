@@ -48,6 +48,29 @@ describe('layoutTitle', () => {
     expect(parseFloat(ops[3].font)).toBeCloseTo(45.83, 1);
   });
 
+  // STORY-16b — true small-caps: edited titles render ALL-CAPS automatically, with only
+  // the first glyph of each word larger. Both the big initial and the small tail are
+  // uppercased; whitespace tokens are untouched.
+  it('uppercases edited titles (true small-caps) for both the initial and the tail', () => {
+    // Runs that do NOT cover either edited title length → force the small-caps path.
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 4, fontSize: 37.5 },
+    ];
+    // Single lowercase-containing word: "Goliath" → 'G'(big) + 'OLIATH'(small).
+    const one = layoutTitle('Goliath', runs, FAMILY, ANCHOR, measure);
+    expect(one.map((o) => o.text)).toEqual(['G', 'OLIATH']);
+    expect(parseFloat(one[0].font)).toBeCloseTo(45.83, 1); // big initial
+    expect(parseFloat(one[1].font)).toBeCloseTo(37.5, 1); // small tail
+    // Multi-word: "Devil Dog" → 'D','EVIL',' ','D','OG', each initial big, tails small.
+    const two = layoutTitle('Devil Dog', runs, FAMILY, ANCHOR, measure);
+    expect(two.map((o) => o.text)).toEqual(['D', 'EVIL', ' ', 'D', 'OG']);
+    // Whitespace token is preserved verbatim.
+    expect(two[2].text).toBe(' ');
+    // Small-caps size invariant still holds (initial run larger than the body run).
+    expect(parseFloat(two[0].font)).toBeGreaterThan(parseFloat(two[1].font));
+  });
+
   it('handles a single word', () => {
     const runs: StyleRun[] = [{ length: 1, fontSize: 45.83 }];
     const ops = layoutTitle('X', runs, FAMILY, ANCHOR, measure);
