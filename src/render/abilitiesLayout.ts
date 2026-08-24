@@ -35,6 +35,12 @@ export interface AbilitiesLayout {
   lines: AbilityLine[];
   /** True if any whole line had to be dropped to fit the box bottom. */
   clipped: boolean;
+  /**
+   * When `clipped`, the 0-based index (into the NON-EMPTY abilities) of the first ability
+   * that could not be fully placed — so the batch CLI can report exactly which ability
+   * overflowed. Undefined when nothing was clipped.
+   */
+  clippedAbilityIndex?: number;
 }
 
 /** Inputs for laying out the abilities block. */
@@ -236,11 +242,14 @@ export function layoutAbilities(
   const lines: AbilityLine[] = [];
   let cursorY = opts.textTop;
   let clipped = false;
+  let clippedAbilityIndex: number | undefined;
   for (let pi = 0; pi < wrapped.paras.length; pi++) {
     for (const segments of wrapped.paras[pi]) {
       // Drop a whole line that would extend past the bottom (never mid-word).
       if (cursorY + wrapped.lh > opts.textBottom + 0.5) {
         clipped = true;
+        // Record the first ability that couldn't be fully placed (for batch reporting).
+        clippedAbilityIndex = pi;
         break;
       }
       lines.push({ y: cursorY, segments });
@@ -250,5 +259,5 @@ export function layoutAbilities(
     if (pi < wrapped.paras.length - 1) cursorY += wrapped.gap;
   }
 
-  return { scale, fontSize: wrapped.fs, lineHeight: wrapped.lh, lines, clipped };
+  return { scale, fontSize: wrapped.fs, lineHeight: wrapped.lh, lines, clipped, clippedAbilityIndex };
 }

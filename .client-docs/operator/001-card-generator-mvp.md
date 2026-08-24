@@ -85,3 +85,29 @@ If you cancel the dialog, the status shows **Export cancelled** — nothing is w
   download if available.
 - **Text looks like the wrong font** — the required fonts failed to load; the app fails
   loudly rather than substituting a font, so reload after confirming the OTFs are present.
+
+## Generating all cards at once (batch)
+
+You can render every Hero card from the spreadsheet in a single command instead of editing them
+one by one in the app.
+
+1. Open a terminal in the project folder.
+2. Run:
+
+   ```
+   npm run batch -- --input "path\to\cards.xlsx" --sheet "full Set Table v2 - stat adjust" --out "path\to\output"
+   ```
+
+   `--sheet` is optional (it defaults to the Hero table). `--input` (the spreadsheet) and
+   `--out` (a folder for the results) are required.
+
+3. The tool checks every Hero row FIRST. If any row has a problem (a missing/typo stat, a
+   Unique/Commander value that isn't 0 or 1, an ability that is missing its `Name: body` colon,
+   or ability text too long to fit the card), it lists **all** the problems and stops **without
+   creating any files**. Fix the spreadsheet and re-run.
+
+4. When every row is clean, it writes one PNG per card (named after the card, e.g.
+   `goliath.png`) plus a `manifest.json` (a list of what was generated) into your `--out` folder.
+
+Tip: the pictures are full-resolution 690×1020 PNGs with transparent corners, identical to what
+the app produces when you export a single card.

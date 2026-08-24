@@ -343,3 +343,29 @@ re-bake. The default bake path is unchanged; with both flags true no patch runs,
 - Fonts are licensed/available to bundle with the app (user supplied the two OTFs).
 - Editable values are point-type single lines except the title (per-run sizing)
   and the abilities body (box-type wrapping).
+
+## 11. Batch CLI (STORY-17)
+
+A headless Node command renders every **Hero** card from the source spreadsheet through the
+SAME production pipeline as the app (bake once + `renderCard` per row), writing one PNG per
+card plus a `manifest.json`.
+
+- **Command:** `npm run batch -- --input <xlsx> --sheet "full Set Table v2 - stat adjust" --out <dir>`
+  (`--sheet` defaults to the Hero table; `--input`/`--out` required).
+- **Ingest/filter:** read the named sheet (SheetJS `xlsx`), keep rows where `Type === "Hero"`
+  (trim/case-insensitive) — 50 rows.
+- **Column mapping (locked):** `Name→name` (render auto-uppercases); `Level/HP/DMG/ACC/Armor
+  →String(Math.round(Number))` fail-loud; `Armor Bars→armorBars` clamped [0,8]; `SubType→
+  unitType` UPPER; `Allegiance→faction` UPPER; species slot static `HUMAN`; `Unique/Commander`
+  0/1→boolean; `Ability 1/2/3` split on FIRST `:` into name+body (empty cell → blank slot;
+  non-empty without `:` → error).
+- **Fail-loud:** a FULL validation pass runs first (field mapping + abilities overflow against
+  the real 191px box). If ANY row errors, every error is printed and the process exits non-zero
+  **without writing any file**. Overflow (a whole ability line clipped even at min scale 0.7) is
+  a hard error, attributed to the offending ability (`clippedAbilityIndex`).
+- **Filenames:** `Name` → lowercase, non-alphanumeric runs → single `-`, trimmed; collisions get
+  `-2`, `-3`, …
+- **Manifest:** `manifest.json` array of `{ name, file, level, hp, dmg, acc, armor, armorBars,
+  unitType, faction, commander, unique, abilities:[{name,body}] }`.
+- **Deps:** `@napi-rs/canvas` (headless canvas + real OTFs, moved to `dependencies`) and `xlsx`.
+  Runs via `vite-node` for extensionless TS import resolution.

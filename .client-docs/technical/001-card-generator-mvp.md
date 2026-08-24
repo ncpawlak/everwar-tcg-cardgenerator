@@ -146,3 +146,21 @@ src/
   tight slot by design.
 - Non-goals deferred to backlog: art placement, hi-res/DPI export, multi-template/batch,
   editing locked labels/chips.
+
+## Batch generation (headless CLI)
+
+Beyond the interactive app, the whole Hero set can be rendered from the source spreadsheet in
+one command — same bake + `renderCard` pipeline as the app, so batch output matches the UI.
+
+- **Entry:** `src/batch/cli.ts` (run through `vite-node`). Pure, unit-tested cores under
+  `src/batch/`: `mapRow.ts` (spreadsheet row → value overlay + manifest, fail-loud per field),
+  `filename.ts` (safe slug + collision suffix), `overflow.ts` (abilities-overflow detector),
+  `nodeCanvas.ts` (Node canvas/font/PSD bootstrap).
+- **Deps:** `xlsx` (SheetJS) to read the workbook; `@napi-rs/canvas` for the headless canvas +
+  the two real OTFs (now a prod dependency because the CLI is a Node tool).
+- **Fail-loud contract:** the CLI validates ALL Hero rows first (bad/missing stats, `Unique`/
+  `Commander` not 0/1, an ability cell missing its `:` splitter, abilities that overflow the box
+  even at min scale). If anything is wrong it prints every error and exits non-zero **without
+  writing a file** — a batch is all-or-nothing.
+- **Output:** one PNG per card (native 690×1020, PSD transparency) + `manifest.json` for
+  traceability, into the `--out` directory.

@@ -115,6 +115,18 @@ npm run build   # tsc --noEmit + vite build
 npm run lint    # ESLint
 ```
 
+### Batch generation (all Hero cards from the spreadsheet)
+
+Render every Hero card from the source xlsx in one headless command (same bake +
+`renderCard` pipeline as the app):
+
+```
+npm run batch -- --input "path\to\cards.xlsx" --sheet "full Set Table v2 - stat adjust" --out "path\to\output"
+```
+
+Validates all rows fail-loud first (writes nothing if any row errors), then writes one
+690x1020 PNG per card plus `manifest.json`. See `.client-docs/operator/` for details.
+
 - Operator guide: `.client-docs/operator/001-card-generator-mvp.md`
 - Technical docs: `.client-docs/technical/001-card-generator-mvp.md`
 - Spec: `.project/spec.md` - Taskboard: `.project/taskboard/001-card-generator-mvp.md`

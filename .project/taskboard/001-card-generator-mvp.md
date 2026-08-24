@@ -621,3 +621,24 @@ remaining chip). Full suite green (96 tests, fidelity 0.914%). Local commit only
   (chips default true), fieldPanel (checkboxes exist, default checked, emit true/false).
   Test count 89 -> 96. QA renders chips-final-{both,no-commander,no-unique,none}.png confirm
   clean hide with the tag row intact.
+
+---
+
+## STORY-17 — Batch CLI: generate all Hero cards from the spreadsheet
+
+**Goal.** Headless Node command reads the xlsx, filters Hero rows (50), maps each to a
+CardModel value overlay, renders through the SHARED pipeline (bake once + `renderCard`), and
+writes one PNG per card + `manifest.json`.
+
+- **CLI.** `npm run batch -- --input <xlsx> --sheet "full Set Table v2 - stat adjust" --out <dir>`
+  (`vite-node src/batch/cli.ts`). New deps: `xlsx` (SheetJS), `@napi-rs/canvas` promoted to
+  `dependencies` (Node-only CLI + fonts).
+- **Structure.** `src/batch/`: `mapRow.ts` (pure row→values+manifest, multi-error collection),
+  `filename.ts` (slug + collision suffix), `overflow.ts` (pure abilities-overflow detector over
+  `layoutAbilities`), `nodeCanvas.ts` (src-local napi/font/PSD bootstrap), `cli.ts` (Node glue:
+  ingest → validate-all → render → write).
+- **Fail-loud.** Full validation pass first (field errors + abilities overflow). Any error →
+  print all, exit non-zero, write nothing. Overflow attributed to the offending ability via
+  `clippedAbilityIndex` (added to `AbilitiesLayout`).
+- **TESTS.** `test/batch/`: `mapRow` (14), `filename` (4), `overflow` (3), `smokeRender` (1 —
+  maps + renders one Goliath row to a real PNG buffer). Test count 99 → 121. Fidelity 0.914%.
