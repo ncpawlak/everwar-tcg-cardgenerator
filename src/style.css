@@ -1,0 +1,139 @@
+/* EverWar Card Generator — app styles (plain CSS, no framework). */
+
+:root {
+  --bg: #14161c;
+  --panel: #1e2129;
+  --edge: #2c3140;
+  --text: #e7e9ee;
+  --muted: #9aa2b1;
+  --accent: #c8b35f; /* card gold */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.app-shell {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  padding: 24px;
+  flex-wrap: wrap;
+}
+
+.preview-col h1 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  letter-spacing: 0.02em;
+}
+
+/* Checkerboard behind the canvas makes the PSD transparency obvious. */
+.card-canvas {
+  display: block;
+  width: 460px; /* scaled down for screen; internal resolution stays 690×1020 */
+  height: auto;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background-image:
+    linear-gradient(45deg, #2a2d36 25%, transparent 25%),
+    linear-gradient(-45deg, #2a2d36 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #2a2d36 75%),
+    linear-gradient(-45deg, transparent 75%, #2a2d36 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.controls {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.export-btn {
+  background: var(--accent);
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  filter: brightness(1.08);
+}
+
+.status {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.panel-col {
+  flex: 1 1 320px;
+  min-width: 300px;
+}
+
+.field-panel {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.field-panel h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.field-row label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field-row input,
+.field-row textarea {
+  background: #14161c;
+  color: var(--text);
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.field-row input:focus,
+.field-row textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Fatal startup error surface. */
+.fatal {
+  margin: 24px;
+  padding: 16px;
+  background: #3a1216;
+  border: 1px solid #7a2630;
+  border-radius: 6px;
+  color: #ffd9dc;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

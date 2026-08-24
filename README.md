@@ -95,3 +95,28 @@ The Orchestrator does these on its own — you never have to ask:
 - **Fleet auto-scaling** — for large *and* shardable work (codebase deep-dive, big Finalize, broad refactor/migration, test backfill, multi-repo), the Orchestrator automatically spins up **N parallel Coder ↔ Reviewer loops** with exclusive file ownership and draft-PR-only rails. Small or tightly-coupled work stays single-track. Coupling, not size, decides. (`.agent/skills/fleet.md`, Constraint #25)
 - **Auto-engage Senior Coder** — anything touching code pulls in the Senior Coder automatically. (Constraint #20)
 - **Correction capture** — when you correct the agents, it's captured and promoted into a durable skill. (Constraint #23)
+
+
+---
+
+# EverWar TCG Card Generator (application)
+
+This repo also contains the app built with the harness: a local, browser-based editor
+for the EverWar card template (`assets/Card_1.psd`). It renders the card faithfully,
+lets you edit its text fields with a live canvas preview, and exports a 690x1020 PNG.
+
+## Quickstart
+
+```
+npm install
+npm run dev     # open the printed URL (Chrome/Edge)
+npm test        # Vitest (46 tests)
+npm run build   # tsc --noEmit + vite build
+npm run lint    # ESLint
+```
+
+- Operator guide: `.client-docs/operator/001-card-generator-mvp.md`
+- Technical docs: `.client-docs/technical/001-card-generator-mvp.md`
+- Spec: `.project/spec.md` - Taskboard: `.project/taskboard/001-card-generator-mvp.md`
+
+Use a Chromium-based browser (Chrome/Edge) for PNG export (File System Access API).

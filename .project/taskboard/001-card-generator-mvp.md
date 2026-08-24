@@ -90,7 +90,7 @@ DOM/UI wiring runs under `environment: 'jsdom'` (or `happy-dom`).
 
 ### STORY-1: Project scaffold — Vite + TS + Vitest + ESLint + asset bundling
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** —
 **Estimated complexity:** M
@@ -123,7 +123,7 @@ or per-file `// @vitest-environment jsdom` for UI tests in STORY-11. Register
 
 ### STORY-2: Editable-layer allow-list + abilities box config
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-1
 **Estimated complexity:** S
@@ -153,7 +153,7 @@ convention — spec §10 mandates an explicit allow-list.
 
 ### STORY-3: PSD loader — parse Card_1.psd in-browser
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-1
 **Estimated complexity:** M
@@ -181,7 +181,7 @@ browser automatically — keep the `initializeCanvas` call in test setup, NOT in
 
 ### STORY-4: Typed text-layer model + extraction
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-2, STORY-3
 **Estimated complexity:** L
@@ -214,7 +214,7 @@ fields. Keep the model UI-agnostic; STORY-10 state seeds its initial values from
 
 ### STORY-5: Font loading — FontFace, fail-loud
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-1
 **Estimated complexity:** S
@@ -241,7 +241,7 @@ fidelity dependency — loudness is a spec requirement (§4.4, §6), assert it.
 
 ### STORY-6: Background baking — non-editable composite
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-3
 **Estimated complexity:** M
@@ -269,7 +269,7 @@ no layer effects (spike-confirmed), so naive drawImage is exact.
 
 ### STORY-7: Title layout — per-run styleRuns small-caps (pure)
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-4
 **Estimated complexity:** M
@@ -298,7 +298,7 @@ assume one size per layer. Keep it canvas-free; STORY-9 supplies `ctx.measureTex
 
 ### STORY-8: Abilities word-wrap + clip (pure)
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-2
 **Estimated complexity:** M
@@ -326,7 +326,7 @@ geometry pure; the caller clips-and-draws in white RomanCondensed.
 
 ### STORY-9: Field draw + renderCard orchestrator
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-5, STORY-6, STORY-7, STORY-8
 **Estimated complexity:** L
@@ -357,7 +357,7 @@ the transform baseline. Inject `ctx.measureText` into STORY-7/8 pure fns here.
 
 ### STORY-10: App state + debounced change
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-4
 **Estimated complexity:** M
@@ -384,7 +384,7 @@ Debounce belongs here so the UI layer stays dumb. Notification triggers a
 
 ### STORY-11: UI layout + field panel + live preview wiring
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-9, STORY-10
 **Estimated complexity:** L
@@ -416,7 +416,7 @@ sign-off.
 
 ### STORY-12: PNG export — showSaveFilePicker
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-9
 **Estimated complexity:** M
@@ -445,7 +445,7 @@ is never filled with an opaque background — verify the bake preserves alpha.
 
 ### STORY-13: Fidelity / regression baseline test
 
-**Status:** 🔴 Not Started
+**Status:** 🟢 Done
 **Assigned to:** Coder
 **Depends on:** STORY-9
 **Estimated complexity:** M
@@ -503,3 +503,4 @@ render-path change without exception.
   `.project/backlog/`), per the Senior Coder scope-creep rule.
 - v1 Non-Goals (spec §9): art placement, hi-res/DPI export, multi-template/batch,
   editing locked labels/chips, desktop packaging, any server/native render path.
+
