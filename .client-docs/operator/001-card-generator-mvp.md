@@ -111,3 +111,37 @@ one by one in the app.
 
 Tip: the pictures are full-resolution 690×1020 PNGs with transparent corners, identical to what
 the app produces when you export a single card.
+
+### Re-generating only what changed (incremental)
+
+If you have already generated a folder of cards and only tweaked a few rows in the spreadsheet,
+add `--incremental` to re-render just the cards that changed (plus any brand-new ones) instead of
+redoing all 50. It compares the spreadsheet against the `manifest.json` already in your `--out`
+folder:
+
+```
+npm run batch -- --input "path\to\cards.xlsx" --sheet "full Set Table v2 - stat adjust" --out "path\to\output" --incremental
+```
+
+- **Unchanged** cards are skipped (their PNG is left untouched).
+- **Changed** cards are re-rendered. The previous PNG is not deleted — it is moved into an
+  `archive\` subfolder inside your output folder under a timestamped name (e.g.
+  `goliath-20260824T180715Z.png`) so you keep a history.
+- **New** cards (names not in the prior manifest) are rendered fresh.
+- **Removed** cards (in the old manifest but no longer Hero rows in the sheet) are moved into
+  `archive\` and dropped from `manifest.json`. Nothing is ever deleted.
+
+If there is no `manifest.json` in the output folder yet, `--incremental` simply renders
+everything, exactly like a normal run.
+
+Add `--dry-run` (with or without `--incremental`) to print the plan — how many cards would be
+unchanged / changed / new / removed — **without writing, moving, or deleting any files**. Use it
+to preview before committing to a run:
+
+```
+npm run batch -- --input "path\to\cards.xlsx" --out "path\to\output" --incremental --dry-run
+```
+
+The same fail-loud validation runs first in every mode: if any Hero row is invalid, nothing is
+written, moved, or archived.
+

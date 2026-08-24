@@ -642,3 +642,29 @@ writes one PNG per card + `manifest.json`.
   `clippedAbilityIndex` (added to `AbilitiesLayout`).
 - **TESTS.** `test/batch/`: `mapRow` (14), `filename` (4), `overflow` (3), `smokeRender` (1 —
   maps + renders one Goliath row to a real PNG buffer). Test count 99 → 121. Fidelity 0.914%.
+
+## STORY-18 — Incremental batch mode (`--incremental` / `--dry-run`, archive-not-delete)
+
+**Goal.** Opt-in incremental re-render: diff the sheet against the prior `<out>/manifest.json`
+and render only CHANGED + NEW cards; preserve superseded/removed PNGs in `<out>/archive/`.
+
+- **18a — pure planner.** `src/batch/incremental.ts` (fs-free/canvas-free):
+  `validatePriorManifest`, `planIncremental(currentCards, prior, existingFiles)`. Identity key
+  `name.trim()`; fixed-shape fingerprint over all fields except `file`. Statuses UNCHANGED /
+  CHANGED (fingerprint differs OR prior PNG missing) / NEW / REMOVED. Retained cards keep prior
+  `file`; NEW allocated collision-safe in sorted order after reserving retained names. Fails loud
+  on malformed manifest or duplicate prior/current names.
+- **18b — CLI wiring.** `src/batch/cli.ts` flags `--incremental` (default off) + `--dry-run`.
+  Validate ALL rows first (fail-loud) in every mode. Order: validate → plan → (dry-run exits) →
+  archive → render → write manifest LAST. Missing prior manifest → full run; corrupt manifest /
+  dup names → fail loud, nothing written. Pipeline body extracted to exported `run(opts)` (throws
+  on failure); `main()` stays `VITEST`-guarded.
+- **Archive (product-owner override of design §6).** CHANGED/REMOVED prior PNG moved to
+  `<out>/archive/<stem>-<compactUTC>.png` before any new write; never deleted; `archive/` excluded
+  from the existing-PNG scan.
+- **TESTS.** `test/batch/incremental.test.ts` (14, pure planner) + `test/batch/cliIncremental.test.ts`
+  (7, in-process `run()` over xlsx fixtures + temp dirs: dry-run writes nothing, corrupt manifest
+  fails, validation-failure no-writes, CHANGED archives-then-writes, REMOVED archives-and-drops,
+  no-prior renders all, UNCHANGED skips). Test count 124 → 145. Fidelity 0.914%. Verified
+  end-to-end on the real 50-card sheet (full → all-UNCHANGED re-run → dry-run → doctored
+  CHANGED/NEW/REMOVED archive run).

@@ -164,3 +164,35 @@ one command — same bake + `renderCard` pipeline as the app, so batch output ma
   writing a file** — a batch is all-or-nothing.
 - **Output:** one PNG per card (native 690×1020, PSD transparency) + `manifest.json` for
   traceability, into the `--out` directory.
+
+### Incremental mode (`--incremental`, `--dry-run`)
+
+Re-renders only cards that changed vs the prior run instead of the full 50, diffing the
+spreadsheet against the `manifest.json` already in `--out`.
+
+- **Pure planner:** `src/batch/incremental.ts` is fs-free / canvas-free and fully unit-tested.
+  `planIncremental(currentCards, priorManifest, existingFiles)` returns a plan: per-card
+  `{status, name, file, manifestEntry, archive}` + the final planned `manifest` + `toRender` /
+  `toArchive` lists. Identity key is `name.trim()` (case-sensitive v1). Fingerprint is a
+  fixed-shape canonical object over every field EXCEPT `file` (so `JSON.stringify` is
+  deterministic), comparing arrays in order and only known fields.
+- **Statuses:** UNCHANGED (same fingerprint AND prior PNG present), CHANGED (fingerprint differs
+  OR prior PNG missing), NEW (name absent from prior), REMOVED (prior name gone from the sheet).
+  Retained cards keep their prior `file` to avoid churn; NEW files are allocated collision-safe in
+  sorted-name order after reserving all retained names. `validatePriorManifest` fails loud on a
+  malformed manifest or duplicate prior/current names.
+- **Archive, not delete (product-owner override of design §6):** a superseded (CHANGED) or REMOVED
+  PNG is moved to `<out>/archive/<stem>-<compactUTC>.png` (e.g. `...-20260824T180715Z.png`, made
+  unique on collision) BEFORE the new PNG is written — CHANGED reuses the same filename, so the old
+  copy must move first. `archive/` is excluded from the existing-PNG scan and never treated as card
+  output. Nothing is ever deleted.
+- **Ordering / crash-safety:** validate ALL rows → plan → (dry-run exits here) → archive moves →
+  render CHANGED+NEW → write `manifest.json` LAST. `--dry-run` performs no bake, render, move, or
+  write; it only prints the plan. Missing prior manifest → notice + behave like a full run. Corrupt
+  prior manifest or duplicate names → fail loud, nothing written.
+- **Testability:** `main()` is `VITEST`-guarded; the pipeline body is the exported `run(opts)`,
+  which throws on fail-loud conditions (the thin `main` wrapper turns a throw into a non-zero
+  exit). `test/batch/cliIncremental.test.ts` drives `run()` in-process against tiny xlsx fixtures +
+  temp dirs to assert on-disk effects (dry-run writes nothing, corrupt manifest fails, CHANGED
+  archives-then-writes, REMOVED archives-and-drops, etc.).
+
