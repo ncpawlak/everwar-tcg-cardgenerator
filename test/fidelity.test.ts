@@ -37,6 +37,10 @@ function originalValues(model: CardModel): Record<string, string> {
     v[slot.nameKey] = '';
     v[slot.bodyKey] = '';
   }
+  // The PSD composite carries its OWN baked 8-segment armor bar. Delete the armorBars key
+  // so renderCard skips the dynamic bar (STORY-15) and the baked bar is compared
+  // apples-to-apples (paired with bakeBackground `patchArmorBar:false`).
+  delete v['armorBars'];
   return v;
 }
 
@@ -47,7 +51,12 @@ describe('fidelity baseline', () => {
     // Faithful baseline: the PSD composite still contains the baked ABILITIES banner,
     // so keep it here (removeAbilitiesBadge:false) to compare the render path apples-to-
     // apples. Badge removal is an intentional deviation, tested in bakeBackground.test.ts.
-    const bg = bakeBackground(psd, { createCanvas: factory, removeAbilitiesBadge: false });
+    const bg = bakeBackground(psd, {
+      createCanvas: factory,
+      removeAbilitiesBadge: false,
+      // Keep the PSD's baked armor bar for the fidelity comparison (see originalValues).
+      patchArmorBar: false,
+    });
     const canvas = createCanvas(model.width, model.height) as any;
     const ctx = canvas.getContext('2d');
     renderCard(ctx, bg, model, originalValues(model));

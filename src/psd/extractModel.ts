@@ -13,6 +13,7 @@ import {
   type EditableField,
   type Rgb,
 } from '../config/editableLayers';
+import { ARMOR_BARS_DEFAULT } from '../config/armorBar';
 import type {
   CardModel,
   FieldModel,
@@ -127,5 +128,8 @@ export function extractModel(
     height: psd.height,
     fields: modelFields,
     order,
+    // Authored armor-bar control (STORY-15). No PSD layer backs it; default to the
+    // template's baked 8-segment count so the card looks unchanged on load.
+    armorBars: ARMOR_BARS_DEFAULT,
   };
 }

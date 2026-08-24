@@ -67,6 +67,29 @@ describe('fieldPanel', () => {
     expect(panel.querySelector('[data-field-id="abilities"]')).toBeNull();
   });
 
+  it('renders an armor-bars number input (0–8) that clamps out-of-range input (STORY-15)', () => {
+    const onInput = vi.fn();
+    const panel = createFieldPanel({ fields: EDITABLE_FIELDS, seed: seedValues(), onInput });
+    document.body.appendChild(panel);
+    const bars = panel.querySelector('[data-field-id="armorBars"]') as HTMLInputElement;
+    expect(bars).toBeTruthy();
+    expect(bars.tagName).toBe('INPUT');
+    expect(bars.type).toBe('number');
+    expect(bars.min).toBe('0');
+    expect(bars.max).toBe('8');
+    // Over-range input is clamped to the max before it reaches state.
+    bars.value = '99';
+    bars.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('armorBars', '8');
+    // Non-integer is floored; negative clamps to 0.
+    bars.value = '3.9';
+    bars.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('armorBars', '3');
+    bars.value = '-5';
+    bars.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput).toHaveBeenCalledWith('armorBars', '0');
+  });
+
   it('calls onInput with the field id and new value on input (layer field + ability)', () => {
     const onInput = vi.fn();
     const panel = createFieldPanel({ fields: EDITABLE_FIELDS, seed: seedValues(), onInput });

@@ -88,6 +88,12 @@ export interface CardModel {
   fields: Record<string, FieldModel>;
   /** Field ids in spec/UI order. */
   order: string[];
+  /**
+   * Armor-bar segment count (STORY-15). An AUTHORED numeric control (0–8), SEPARATE from
+   * the printed `armor` text field. Default 8 matches the template's baked art. It is NOT
+   * a field entry (not in `order`/`fields`) — it is drawn dynamically over the background.
+   */
+  armorBars: number;
 }
 
 /** Narrowing helper — true for the abilities field. */

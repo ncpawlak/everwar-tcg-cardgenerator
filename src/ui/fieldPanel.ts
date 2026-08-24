@@ -6,6 +6,8 @@
 // composition root, keeping this component dumb.
 import type { EditableField } from '../config/editableLayers';
 import { ABILITY_SLOTS } from '../config/editableLayers';
+import { ARMOR_BARS_DEFAULT, ARMOR_BARS_MAX } from '../config/armorBar';
+import { coerceArmorBars } from '../render/armorBarLayout';
 
 /** Panel construction inputs. */
 export interface FieldPanelDeps {
@@ -63,7 +65,47 @@ export function createFieldPanel(deps: FieldPanelDeps): HTMLElement {
     panel.appendChild(row);
   }
 
+  // STORY-15 — authored armor-bar control (not a PSD field, so appended after the loop).
+  appendArmorBarRow(panel, seed, onInput);
+
   return panel;
+}
+
+/**
+ * Append the "Armor bars" numeric control (0–8). It writes the `armorBars` value key.
+ * Input is coerced to an integer and clamped to [0, ARMOR_BARS_MAX] before it reaches
+ * state, so out-of-range/non-integer typing can never produce an invalid bar count (the
+ * pure layout helper stays defensive too, per spec).
+ */
+function appendArmorBarRow(
+  panel: HTMLElement,
+  seed: Record<string, string>,
+  onInput: (id: string, value: string) => void,
+): void {
+  const row = document.createElement('div');
+  row.className = 'field-row';
+
+  const label = document.createElement('label');
+  label.textContent = 'Armor bars (0–8)';
+  label.htmlFor = 'field-armorBars';
+  row.appendChild(label);
+
+  const control = document.createElement('input');
+  control.type = 'number';
+  control.min = '0';
+  control.max = String(ARMOR_BARS_MAX);
+  control.step = '1';
+  control.id = 'field-armorBars';
+  control.setAttribute('data-field-id', 'armorBars');
+  control.value = seed['armorBars'] ?? String(ARMOR_BARS_DEFAULT);
+
+  // Coerce + clamp on every edit so state only ever sees a valid integer string.
+  control.addEventListener('input', () => {
+    onInput('armorBars', String(coerceArmorBars(control.value)));
+  });
+
+  row.appendChild(control);
+  panel.appendChild(row);
 }
 
 /**

@@ -87,4 +87,27 @@ describe('renderCard', () => {
     const second = canvas.getContext('2d').getImageData(0, 0, 100, 100).data;
     for (let i = 0; i < first.length; i++) expect(second[i]).toBe(first[i]);
   });
+
+  // STORY-15 — the dynamic armor bar is drawn over the background before editable text.
+  it('draws green armor segments for armorBars=8 and an empty track for armorBars=0', () => {
+    const psd = readPsdBuffer(readCardPsdBuffer());
+    const model = extractModel(psd);
+    const bg = bakeBackground(psd, { createCanvas: factory });
+
+    // N=8: sample the centre of the first segment (~x=614, y=361) — bright green.
+    const c8 = createCanvas(model.width, model.height) as any;
+    const ctx8 = c8.getContext('2d');
+    renderCard(ctx8, bg, model, { ...initialValues(model), armorBars: '8' });
+    const g8 = ctx8.getImageData(614, 361, 1, 1).data;
+    expect(g8[1]).toBeGreaterThan(g8[0] + 20); // green channel dominant
+    expect(g8[1]).toBeGreaterThan(120);
+
+    // N=0: same pixel must be the dark empty-track recess (no green dominance).
+    const c0 = createCanvas(model.width, model.height) as any;
+    const ctx0 = c0.getContext('2d');
+    renderCard(ctx0, bg, model, { ...initialValues(model), armorBars: '0' });
+    const g0 = ctx0.getImageData(614, 361, 1, 1).data;
+    expect(g0[1]).toBeLessThan(60);
+    expect(Math.abs(g0[1] - g0[0])).toBeLessThan(15);
+  });
 });

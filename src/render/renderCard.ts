@@ -5,6 +5,7 @@ import type { CardModel } from '../psd/types';
 import { isAbilities } from '../psd/types';
 import { drawText, type Ctx2D } from './drawText';
 import { drawAbilities } from './drawAbilities';
+import { drawArmorBar } from './drawArmorBar';
 
 /** Anything drawImage accepts as a source (canvas/bitmap). Typed loosely for env. */
 export type BackgroundSource = any;
@@ -23,6 +24,13 @@ export function renderCard(
   // an opaque colour). Then blit the pre-baked background.
   ctx.clearRect(0, 0, model.width, model.height);
   ctx.drawImage(background, 0, 0);
+
+  // Dynamic armor bar (STORY-15): drawn over the (patched) background and BEFORE any
+  // editable text. Skipped ONLY when the value key is absent — the fidelity baseline
+  // deletes it so the render is compared against the PSD's own baked bar apples-to-apples.
+  if (values['armorBars'] !== undefined) {
+    drawArmorBar(ctx, values['armorBars']);
+  }
 
   // Draw each editable field over the background in defined order.
   for (const id of model.order) {

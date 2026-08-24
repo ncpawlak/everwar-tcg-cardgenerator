@@ -559,3 +559,33 @@ Post-badge-removal enhancement; full suite kept green (76 tests, fidelity 0.914%
   reclaimed top, skip-empty, shrink, clip) + `test/abilitiesFit.test.ts` (real-font
   Variant D fit). Updated config/extractModel/fidelity/renderCard/fieldPanel tests.
   Fidelity stays 0.914% (baseline renders abilities EMPTY). Test count 65 -> 76.
+
+
+---
+
+## STORY-15 — Dynamic armor bar (user-approved)
+
+Authored numeric control replacing the baked fixed 8-segment bar. Full suite green
+(89 tests, fidelity 0.914%). Local commit only.
+
+- **MODEL/CONFIG.** New `armorBars: number` (default 8) on `CardModel` (src/psd/types.ts),
+  set by `extractModel` and seeded to the flat store by `seedValues` (key `armorBars`).
+  It is an authored control — NOT a PSD text layer and NOT in `model.order`. Geometry,
+  colours, cap (8) and the bake-patch rect live in new `src/config/armorBar.ts`.
+- **BAKE PATCH.** `bakeBackground` gained `patchArmorBar?: boolean` (default true) — after
+  the composite loop it fills the fill channel (x599-629, y351-525) with the empty-recess
+  colour so the PSD's baked green never shows through. Broad frame/right-rail layers are
+  NOT skipped. Fidelity bakes `patchArmorBar:false` + omits `armorBars` → 0.914% holds.
+- **PURE LAYOUT.** `src/render/armorBarLayout.ts` `armorBarSegments(n, track, gap)` → N
+  equal segment rects (gap 0 when N=1), defensive `coerceArmorBars` (floor/clamp [0,8]).
+  Canvas-free, unit-tested.
+- **DRAW.** `src/render/drawArmorBar.ts` — empty recessed track for 0, else olive divider
+  base + top-lit/left-beveled gradient green segments; called from `renderCard` after the
+  background blit, before editable text.
+- **UI.** `fieldPanel.ts` appends an "Armor bars (0-8)" number input, coerced+clamped to
+  an integer via `coerceArmorBars` before it reaches state (~120ms debounce → re-render).
+- **TESTS.** `test/armorBarLayout.test.ts` (N=0/1/2/8, clamp), `test/armorBarConfig.test.ts`
+  (pinned geometry/colours), plus bakeBackground (patch covers green, frame untouched),
+  renderCard (green at N=8 centre, empty at N=0), extractModel (armorBars=8), fieldPanel
+  (clamp). Test count 76 -> 89. QA renders armorbar-final-N{0,1,2,3,5,8}.png match the
+  Senior's spike proofs.

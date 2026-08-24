@@ -75,4 +75,30 @@ describe('bakeBackground', () => {
     const tagN = nCtx.getImageData(110, 750, 1, 1).data;
     expect([tagW[0], tagW[1], tagW[2], tagW[3]]).toEqual([tagN[0], tagN[1], tagN[2], tagN[3]]);
   });
+
+  // Armor-bar patch (STORY-15) — the baked green fill is covered with the empty-recess
+  // colour during the static bake so no old green shows through the dynamic bar.
+  it('patches the baked armor-bar green (default) without touching neighbouring frame art', () => {
+    const psd = readPsdBuffer(readCardPsdBuffer());
+    const withPatch = bakeBackground(psd, { createCanvas: factory });
+    const noPatch = bakeBackground(psd, { createCanvas: factory, patchArmorBar: false });
+    const wCtx = withPatch.getContext('2d');
+    const nCtx = noPatch.getContext('2d');
+
+    // The unpatched bake still has bright baked green at a segment centre (~x=614,y=361).
+    const greenN = nCtx.getImageData(614, 361, 1, 1).data;
+    expect(greenN[1]).toBeGreaterThan(greenN[0] + 20); // green channel dominant
+    expect(greenN[1]).toBeGreaterThan(120);
+
+    // The patched bake replaces it with the dark empty-recess colour (no green dominance).
+    const greenW = wCtx.getImageData(614, 361, 1, 1).data;
+    expect(greenW[1]).toBeLessThan(60);
+    expect(Math.abs(greenW[1] - greenW[0])).toBeLessThan(15);
+
+    // A pixel OUTSIDE the track (the metallic housing at ~x=633,y=400) is byte-identical
+    // between the two bakes — the patch never reaches the surrounding frame art.
+    const outW = wCtx.getImageData(633, 400, 1, 1).data;
+    const outN = nCtx.getImageData(633, 400, 1, 1).data;
+    expect([outW[0], outW[1], outW[2], outW[3]]).toEqual([outN[0], outN[1], outN[2], outN[3]]);
+  });
 });

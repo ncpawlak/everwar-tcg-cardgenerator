@@ -198,6 +198,33 @@ This all lives in the pure, measurer-injected core `src/render/abilitiesLayout.t
 (mixed-weight wrapping + block fit) and is drawn by `src/render/drawAbilities.ts`; both
 are unit-tested without a real canvas.
 
+### 4.7 Dynamic armor bar (STORY-15, user-approved)
+
+The card's right rail carries a segmented armor bar. In v1 it is driven by an **authored
+numeric control `armorBars` (integer 0–8, default 8)** — SEPARATE from the printed
+`armor` text value. Default 8 matches the template's baked art, so the card looks
+unchanged on load.
+
+**Semantics (not a partial-fill meter).** For any `N > 0` the full track is filled by
+`N` equal green segments separated by fixed **2px** gaps (gap collapses to 0 when N=1).
+`N = 0` shows the empty recessed track (no green). Out-of-range/non-integer input is
+coerced to an integer clamped to `[0, 8]` at the UI boundary, and the pure layout helper
+stays defensive (floor at 0, clamp at the cap) even if the UI is bypassed.
+
+**Geometry (measured from the PSD).** Housing track `{599,351}–{629,525}` (H=174); green
+fill inset 1px to x=600–629. `segmentHeight = (174 − (N−1)·2) / N`; segment `i` starts at
+`351 + i·(segmentHeight + gap)`. The green is top-lit and left-beveled (bright top
+`rgb(202,242,99)` → mid `rgb(136,167,66)` → darker bottom), gaps show olive
+`rgb(82,79,48)`, and the empty track is a dark recess (`rgb(13,14,13)`/`rgb(24,25,22)`).
+
+**Bake coordination.** The PSD's baked 8-segment green is covered during the static bake
+by an empty-recess patch over the fill channel (`bakeBackground` `patchArmorBar`, default
+true), then the dynamic bar is drawn by `src/render/drawArmorBar.ts` from `renderCard`
+right after the background blit and before editable text. The pure segment math lives in
+`src/render/armorBarLayout.ts` (canvas-free, unit-tested). The **fidelity baseline** bakes
+with `patchArmorBar:false` and omits the `armorBars` key so it compares against the PSD's
+own baked bar (0.914% holds).
+
 ### 4.4 Fidelity notes
 
 - Fonts are the hard dependency and are now satisfied (bundled). Do not silently

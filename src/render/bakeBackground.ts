@@ -10,6 +10,7 @@ import type { Psd } from 'ag-psd';
 import { flattenLayers } from '../psd/loadPsd';
 import { EDITABLE_LAYER_NAMES } from '../config/editableLayers';
 import { ABILITIES_BADGE_PATCH } from '../config/framePatch';
+import { ARMOR_BAR_PATCH, ARMOR_BAR_COLORS } from '../config/armorBar';
 
 /** Minimal canvas shape the bake needs (works for DOM + napi canvases). */
 export interface BakeCanvas {
@@ -30,6 +31,12 @@ export interface BakeDeps {
    * Tests set this false to compare an untouched bake.
    */
   removeAbilitiesBadge?: boolean;
+  /**
+   * Cover the PSD's baked 8-segment armor bar with the empty-recess colour (defaults to
+   * TRUE) so the dynamic bar (STORY-15) never reveals old green underneath. The fidelity
+   * baseline sets this false to compare against the PSD's own baked bar.
+   */
+  patchArmorBar?: boolean;
 }
 
 /** Default browser canvas factory. */
@@ -48,6 +55,7 @@ export function bakeBackground(psd: Psd, deps: BakeDeps = {}): BakeCanvas {
   const createCanvas = deps.createCanvas ?? domCanvasFactory;
   const skip = deps.skipNames ?? EDITABLE_LAYER_NAMES;
   const removeAbilitiesBadge = deps.removeAbilitiesBadge ?? true;
+  const patchArmorBar = deps.patchArmorBar ?? true;
 
   const canvas = createCanvas(psd.width, psd.height);
   const ctx = canvas.getContext('2d');
@@ -76,6 +84,22 @@ export function bakeBackground(psd: Psd, deps: BakeDeps = {}): BakeCanvas {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000000';
     ctx.fillRect(p.left, p.top, p.right - p.left, p.bottom - p.top);
+  }
+
+  // Cover the PSD's baked 8-segment armor bar (STORY-15). The dynamic bar is drawn fresh
+  // on every render, but patching the baked green here guarantees no old green survives
+  // at the track edges/gaps. Filled with the empty-recess colour (a dark inner channel
+  // over a deeper outer recess), staying strictly inside the track so the surrounding
+  // metallic housing/frame art is untouched. Disabled for the fidelity baseline.
+  if (patchArmorBar) {
+    const a = ARMOR_BAR_PATCH;
+    const w = a.right - a.left;
+    const h = a.bottom - a.top;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = ARMOR_BAR_COLORS.emptyOuter;
+    ctx.fillRect(a.left, a.top, w, h);
+    ctx.fillStyle = ARMOR_BAR_COLORS.emptyInner;
+    ctx.fillRect(a.left + 1, a.top + 1, w - 2, h - 2);
   }
   return canvas;
 }

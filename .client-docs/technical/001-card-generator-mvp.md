@@ -48,9 +48,11 @@ src/
 │  ├─ fitText.ts               PURE single-line shrink-to-fit (tracking→scale)
 │  ├─ wrapText.ts              PURE greedy word-wrap + clip (injected measurer)
 │  ├─ abilitiesLayout.ts       PURE mixed-weight wrap + block fit/clip (injected measurer)
+│  ├─ armorBarLayout.ts        PURE armor segment rects + coerce/clamp (no canvas)
 │  ├─ drawText.ts              draw one layer-backed field (single-line / title)
 │  ├─ drawAbilities.ts         draw the up-to-3 structured abilities (bold name + body)
-│  └─ renderCard.ts            bg + every field (the edit-time redraw)
+│  ├─ drawArmorBar.ts          draw the dynamic 0–8 armor bar (empty track / gradient segs)
+│  └─ renderCard.ts            bg + armor bar + every field (the edit-time redraw)
 ├─ state/appState.ts           values + debounced subscribe
 ├─ app/livePreview.ts          edit-loop wiring (panel+state+debounced render)
 ├─ app/seedValues.ts           model → initial value map (abilities → 6 slot keys)
@@ -81,6 +83,14 @@ src/
   starts `x=59, y=780, w=583` (191px usable), ~6px paragraph gap, whole-line clip at
   y=971, dormant shrink-to-fit (floor 0.7×) if it overflows. White
   `Square721BT-RomanCondensed` body / `Square721BT-BoldCondensed` name, 21px / 25px.
+- **Dynamic armor bar** is an authored numeric control `armorBars` (0–8, default 8),
+  separate from the printed `armor` text. `renderCard` calls `drawArmorBar` right after
+  the background blit and before text. The pure `armorBarLayout.ts` splits the fill rect
+  (x600–629, y351–525, H=174) into N equal segments (2px gaps; 0 for N=1) and defensively
+  coerces/clamps input to `[0,8]`. The PSD's baked 8-segment art is covered during the
+  bake (`bakeBackground` `patchArmorBar`, default true); the fidelity baseline disables it
+  and omits `armorBars` to keep 0.914%. Config (geometry/colours/patch) lives in
+  `config/armorBar.ts`.
 - **Opacity is 0–1** in ag-psd — applied directly as canvas alpha (never `/255`).
 - **`@napi-rs/canvas` is dev/test-only** — it renders/measures in Node tests and feeds
   `ag-psd`'s `initializeCanvas`; it never enters the browser bundle.

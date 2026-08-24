@@ -86,6 +86,14 @@ describe('extractModel', () => {
     expect(round.fields['name'].text).toBe('IRONFIST COMMANDER');
   });
 
+  it('seeds the authored armorBars control at the default 8 (STORY-15)', () => {
+    const model = buildModel();
+    // Authored numeric — not a field entry, so it must NOT appear in order/fields.
+    expect(model.armorBars).toBe(8);
+    expect(model.order).not.toContain('armorBars');
+    expect(model.fields['armorBars']).toBeUndefined();
+  });
+
   it('throws loudly when an allow-list layer name is missing', () => {
     const psd = readPsdBuffer(readCardPsdBuffer());
     const bogus = [
