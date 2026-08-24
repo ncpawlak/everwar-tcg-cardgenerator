@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as XLSX from 'xlsx';
-import { readPsd } from 'ag-psd';
+import { readPsdBuffer } from '../psd/loadPsd';
 import { extractModel } from '../psd/extractModel';
 import { seedValues } from '../app/seedValues';
 import { bakeBackground } from '../render/bakeBackground';
@@ -99,8 +99,11 @@ function main(): void {
   console.log(`Read ${heroRows.length} Hero row(s) from "${opts.sheet}".`);
 
   // --- Shared pipeline bootstrap (bake ONCE) --------------------------------
+  // Use the SAME loader as the app (readPsdBuffer) so each layer keeps its rasterized
+  // `.canvas` — bakeBackground composites via `.canvas`. (A raw readPsd with
+  // useImageData:true would populate `.imageData` instead and bake a transparent frame.)
   setupNodeCanvas();
-  const psd = readPsd(readTemplatePsd(), { useImageData: true, useRawThumbnail: true });
+  const psd = readPsdBuffer(readTemplatePsd());
   const model = extractModel(psd);
   const seed = seedValues(model);
   const background = bakeBackground(psd, {
