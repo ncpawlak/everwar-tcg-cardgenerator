@@ -10,13 +10,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Current phase / gate** | Harness self-maintenance — idle / awaiting direction |
-| **Active branch** | `agent-harness` (source of authority; mirrored to `master`) |
-| **In-flight** | Nothing active |
-| **Last milestone** | Fleet mode added (auto-scaled parallel execution, Constraint #25) |
-| **Blocked on** | Nothing |
-| **Next up** | Await user direction (optional: instantiate real Nightwatch cron in a repo with tests) |
-| **Last updated** | 2026-08-17 — Orchestrator |
+| **Current phase / gate** | Gate 3 close-out committed — push/PR pending manual push (auth blocker) |
+| **Active branch** | `npawlakel-psd-card-editor` |
+| **In-flight** | Card generator: MVP + dynamic chips + auto title-casing + batch CLI + incremental mode ALL COMPLETE + Gate 3 docs committed (`689863d`); dev server on :5180 |
+| **Last milestone** | Reviewer PASS after STORY-18 (incremental batch); 145/145 tests green; fidelity 0.914% |
+| **Blocked on** | Push denied — CLI authed as `npawlakEL` (read-only on `ncpawlak/everwar-tcg-cardgenerator`). User will push manually. |
+| **Next up** | User pushes branch + opens/merges PR |
+| **Last updated** | 2026-08-24 — Learner (batch + incremental close-out) |
 
 ## Notes
 - The Orchestrator owns this file. If it's stale, resumption and `boot` degrade —
