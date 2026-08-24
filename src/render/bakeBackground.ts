@@ -9,6 +9,7 @@
 import type { Psd } from 'ag-psd';
 import { flattenLayers } from '../psd/loadPsd';
 import { EDITABLE_LAYER_NAMES } from '../config/editableLayers';
+import { ABILITIES_BADGE_PATCH } from '../config/framePatch';
 
 /** Minimal canvas shape the bake needs (works for DOM + napi canvases). */
 export interface BakeCanvas {
@@ -23,6 +24,12 @@ export interface BakeDeps {
   createCanvas?: (w: number, h: number) => BakeCanvas;
   /** Layer names to exclude (defaults to the editable allow-list). */
   skipNames?: ReadonlySet<string>;
+  /**
+   * Paint over the baked ABILITIES banner with interior black (defaults to TRUE). The
+   * generator authors the abilities body itself, so the PSD's baked banner is removed.
+   * Tests set this false to compare an untouched bake.
+   */
+  removeAbilitiesBadge?: boolean;
 }
 
 /** Default browser canvas factory. */
@@ -40,6 +47,7 @@ function domCanvasFactory(w: number, h: number): BakeCanvas {
 export function bakeBackground(psd: Psd, deps: BakeDeps = {}): BakeCanvas {
   const createCanvas = deps.createCanvas ?? domCanvasFactory;
   const skip = deps.skipNames ?? EDITABLE_LAYER_NAMES;
+  const removeAbilitiesBadge = deps.removeAbilitiesBadge ?? true;
 
   const canvas = createCanvas(psd.width, psd.height);
   const ctx = canvas.getContext('2d');
@@ -58,5 +66,16 @@ export function bakeBackground(psd: Psd, deps: BakeDeps = {}): BakeCanvas {
     ctx.drawImage(layer.canvas, layer.left ?? 0, layer.top ?? 0);
   }
   ctx.globalAlpha = 1;
+
+  // Remove the PSD's baked ABILITIES banner. The banner sits entirely inside the black
+  // abilities-box interior, so a flat opaque-black fillRect over its measured footprint
+  // erases it with no seam (black-on-black) and cannot reach the tag row above the box
+  // border. This is the only region of the otherwise-transparent canvas made opaque.
+  if (removeAbilitiesBadge) {
+    const p = ABILITIES_BADGE_PATCH;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(p.left, p.top, p.right - p.left, p.bottom - p.top);
+  }
   return canvas;
 }

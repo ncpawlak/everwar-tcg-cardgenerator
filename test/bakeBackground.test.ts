@@ -54,4 +54,25 @@ describe('bakeBackground', () => {
     const c = compCtx.getImageData(px, py, 1, 1).data;
     for (let i = 0; i < 3; i++) expect(Math.abs(b[i] - c[i])).toBeLessThanOrEqual(4);
   });
+
+  // ABILITIES-badge removal — the baked banner is painted over with interior black.
+  it('removes the ABILITIES badge (default) with opaque black, leaving the tag row untouched', () => {
+    const psd = readPsdBuffer(readCardPsdBuffer());
+    // Default bake removes the badge; the control bake keeps it for comparison.
+    const withPatch = bakeBackground(psd, { createCanvas: factory });
+    const noPatch = bakeBackground(psd, { createCanvas: factory, removeAbilitiesBadge: false });
+    const wCtx = withPatch.getContext('2d');
+    const nCtx = noPatch.getContext('2d');
+
+    // Center of the patch rect (~x=143, y=793) must be opaque black after removal.
+    const center = wCtx.getImageData(143, 793, 1, 1).data;
+    expect([center[0], center[1], center[2], center[3]]).toEqual([0, 0, 0, 255]);
+
+    // A pixel in the INFANTRY tag-row band ABOVE the box border (outside the rect) must
+    // be byte-identical between the patched and unpatched bakes — proof the tag row is
+    // never touched.
+    const tagW = wCtx.getImageData(110, 750, 1, 1).data;
+    const tagN = nCtx.getImageData(110, 750, 1, 1).data;
+    expect([tagW[0], tagW[1], tagW[2], tagW[3]]).toEqual([tagN[0], tagN[1], tagN[2], tagN[3]]);
+  });
 });

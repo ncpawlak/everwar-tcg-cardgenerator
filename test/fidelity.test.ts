@@ -39,7 +39,10 @@ describe('fidelity baseline', () => {
   it('renders original values within tolerance of the PSD composite', () => {
     const psd = readPsdBuffer(readCardPsdBuffer());
     const model = extractModel(psd);
-    const bg = bakeBackground(psd, { createCanvas: factory });
+    // Faithful baseline: the PSD composite still contains the baked ABILITIES banner,
+    // so keep it here (removeAbilitiesBadge:false) to compare the render path apples-to-
+    // apples. Badge removal is an intentional deviation, tested in bakeBackground.test.ts.
+    const bg = bakeBackground(psd, { createCanvas: factory, removeAbilitiesBadge: false });
     const canvas = createCanvas(model.width, model.height) as any;
     const ctx = canvas.getContext('2d');
     renderCard(ctx, bg, model, originalValues(model));
