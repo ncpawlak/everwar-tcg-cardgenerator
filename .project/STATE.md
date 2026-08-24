@@ -10,13 +10,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Current phase / gate** | Harness self-maintenance — idle / awaiting direction |
-| **Active branch** | `agent-harness` (source of authority; mirrored to `master`) |
-| **In-flight** | Nothing active |
-| **Last milestone** | Fleet mode added (auto-scaled parallel execution, Constraint #25) |
-| **Blocked on** | Nothing |
-| **Next up** | Await user direction (optional: instantiate real Nightwatch cron in a repo with tests) |
-| **Last updated** | 2026-08-17 — Orchestrator |
+| **Current phase / gate** | Gate 2 — Coder TDD implementation (13-story taskboard) |
+| **Active branch** | `npawlakel-psd-card-editor` |
+| **In-flight** | Coder building EverWar TCG Card Generator per `.project/taskboard/001-card-generator-mvp.md` |
+| **Last milestone** | Gate 1 spec approved; Gate 1.5 taskboard written (13 TDD stories, src/ structure, inject-measurer test strategy) |
+| **Blocked on** | Nothing — Coder implementing |
+| **Next up** | Senior Coder architectural review → Reviewer QA + visual verification → Gate 2.5 push approval |
+| **Last updated** | 2026-08-23 — Orchestrator |
 
 ## Notes
 - The Orchestrator owns this file. If it's stale, resumption and `boot` degrade —

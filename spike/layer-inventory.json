@@ -1,0 +1,850 @@
+{
+  "width": 690,
+  "height": 1020,
+  "layers": [
+    {
+      "id": 0,
+      "name": "Background",
+      "path": "Background",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": true,
+      "opacity": 1,
+      "bounds": {
+        "left": 0,
+        "top": 0,
+        "right": 690,
+        "bottom": 1020
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 1,
+      "name": "Frame 0",
+      "path": "Frame 0",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": -1,
+        "top": 0,
+        "right": 690,
+        "bottom": 1022
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 2,
+      "name": "Frame 2",
+      "path": "Frame 2",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 0,
+        "top": 0,
+        "right": 659,
+        "bottom": 1020
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 3,
+      "name": "Frame 1",
+      "path": "Frame 1",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 0,
+        "top": 0,
+        "right": 690,
+        "bottom": 1020
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 4,
+      "name": "Layer 2",
+      "path": "Layer 2",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 31,
+        "top": 616,
+        "right": 526,
+        "bottom": 724
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 5,
+      "name": "Layer 1",
+      "path": "Layer 1",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 615,
+        "top": 135,
+        "right": 690,
+        "bottom": 997
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 6,
+      "name": "Layer 3",
+      "path": "Layer 3",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 20,
+        "top": 686,
+        "right": 670,
+        "bottom": 979
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 7,
+      "name": "COMMANDER",
+      "path": "COMMANDER",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 90,
+        "top": 698,
+        "right": 185,
+        "bottom": 712
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "COMMANDER",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 18.75,
+        "fillColor": "rgb(204,195,97)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          90.11532034645555,
+          711.8336417035883
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 8,
+      "name": "UNIQUE",
+      "path": "UNIQUE",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 268,
+        "top": 701,
+        "right": 314,
+        "bottom": 713
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "UNIQUE",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 16.66667,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          267.8535451011044,
+          712.5077929444155
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 9,
+      "name": "ABILITIES",
+      "path": "ABILITIES",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 86,
+        "top": 785,
+        "right": 176,
+        "bottom": 803
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "ABILITIES",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 25,
+        "fillColor": "rgb(204,195,97)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          86.70587980031848,
+          803.0344428826393
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 10,
+      "name": "green",
+      "path": "green",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 390,
+        "top": 344,
+        "right": 636,
+        "bottom": 537
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 11,
+      "name": "Name text",
+      "path": "Name text",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 72,
+        "top": 43,
+        "right": 413,
+        "bottom": 76
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "IRONFIST COMMANDER",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 45.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          69.63263794146414,
+          75.91642833971233
+        ],
+        "styleRuns": [
+          {
+            "length": 1,
+            "fontSize": 45.83333,
+            "fillColor": null
+          },
+          {
+            "length": 8,
+            "fontSize": 37.5,
+            "fillColor": null
+          },
+          {
+            "length": 1,
+            "fontSize": 45.83333,
+            "fillColor": null
+          },
+          {
+            "length": 8,
+            "fontSize": 37.5,
+            "fillColor": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "name": "LEVEL",
+      "path": "LEVEL",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 574,
+        "top": 41,
+        "right": 615,
+        "bottom": 56
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "LEVEL",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 20.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          572.9884271888094,
+          56.27548425363176
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 13,
+      "name": "4",
+      "path": "4",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 582,
+        "top": 75,
+        "right": 605,
+        "bottom": 111
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "4",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 50,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          581.1129673500799,
+          110.67302099745021
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 14,
+      "name": "40",
+      "path": "40",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 597,
+        "top": 165,
+        "right": 644,
+        "bottom": 201
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "40",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 50,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          596.2413666403548,
+          200.67880884426881
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 15,
+      "name": "HP",
+      "path": "HP",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 615,
+        "top": 215,
+        "right": 636,
+        "bottom": 230
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "HP",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 20.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          614.5189843259196,
+          230.28289271033333
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 16,
+      "name": "25",
+      "path": "25",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 601,
+        "top": 261,
+        "right": 647,
+        "bottom": 297
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "25",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 50,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          598.5616382279004,
+          296.75961462864694
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 17,
+      "name": "ARMOR",
+      "path": "ARMOR",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 593,
+        "top": 308,
+        "right": 652,
+        "bottom": 323
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "ARMOR",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 20.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          593.2265140852833,
+          322.98981266830305
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 18,
+      "name": "30",
+      "path": "30",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 599,
+        "top": 566,
+        "right": 645,
+        "bottom": 602
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "30",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 50,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          596.6441417499292,
+          602.4605784577345
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 19,
+      "name": "DMG",
+      "path": "DMG",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 605,
+        "top": 614,
+        "right": 643,
+        "bottom": 629
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "DMG",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 20.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          604.6271875398597,
+          628.8372794210624
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 20,
+      "name": "75",
+      "path": "75",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 598,
+        "top": 652,
+        "right": 644,
+        "bottom": 688
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "75",
+        "font": "Square721BT-BoldCondensed",
+        "fontSize": 50,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          596.1851124601692,
+          688.4255590668529
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 21,
+      "name": "ACC",
+      "path": "ACC",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 608,
+        "top": 697,
+        "right": 639,
+        "bottom": 712
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "ACC",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 20.83333,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          608.5899572062985,
+          711.9698011581003
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 22,
+      "name": "INFANTRY",
+      "path": "INFANTRY",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 81,
+        "top": 743,
+        "right": 148,
+        "bottom": 757
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "INFANTRY",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 18.75,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          80.78320385925201,
+          756.742929210147
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 23,
+      "name": "IRONWARD LEGION",
+      "path": "IRONWARD LEGION",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 285,
+        "top": 743,
+        "right": 414,
+        "bottom": 757
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "IRONWARD LEGION",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 18.75,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          284.70658198540764,
+          756.8299986496692
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 24,
+      "name": "HUMAN",
+      "path": "HUMAN",
+      "depth": 0,
+      "isGroup": false,
+      "isText": true,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 554,
+        "top": 742,
+        "right": 607,
+        "bottom": 756
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null,
+      "text": {
+        "content": "HUMAN",
+        "font": "Square721BT-RomanCondensed",
+        "fontSize": 18.75,
+        "fillColor": "rgb(255,255,255)",
+        "justification": "left",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          553.6501269939598,
+          755.5157875479972
+        ],
+        "styleRuns": []
+      }
+    },
+    {
+      "id": 25,
+      "name": "pLUS ICON",
+      "path": "pLUS ICON",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 547,
+        "top": 179,
+        "right": 589,
+        "bottom": 223
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 26,
+      "name": "Layer 4",
+      "path": "Layer 4",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 550,
+        "top": 266,
+        "right": 586,
+        "bottom": 312
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 27,
+      "name": "2 Icon",
+      "path": "2 Icon",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 555,
+        "top": 654,
+        "right": 587,
+        "bottom": 695
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    },
+    {
+      "id": 28,
+      "name": "1 Icon",
+      "path": "1 Icon",
+      "depth": 0,
+      "isGroup": false,
+      "isText": false,
+      "hidden": false,
+      "opacity": 1,
+      "bounds": {
+        "left": 549,
+        "top": 581,
+        "right": 593,
+        "bottom": 622
+      },
+      "hasCanvas": true,
+      "blendMode": "normal",
+      "effects": null
+    }
+  ]
+}
