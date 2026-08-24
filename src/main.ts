@@ -12,13 +12,12 @@ import { loadFonts, FONT_FAMILIES } from './fonts/loadFonts';
 import { loadPsd } from './psd/loadPsd';
 import { extractModel } from './psd/extractModel';
 import { bakeBackground } from './render/bakeBackground';
-import { renderCard } from './render/renderCard';
-import { createAppState, type Values } from './state/appState';
-import { createFieldPanel } from './ui/fieldPanel';
+import { createLivePreview } from './app/livePreview';
 import { buildLayout } from './ui/preview';
 import { exportPng } from './export/exportPng';
 import { EDITABLE_FIELDS } from './config/editableLayers';
 import type { CardModel } from './psd/types';
+import type { Values } from './state/appState';
 
 /** Seed the value map from the model's captured field texts. */
 function seedFromModel(model: CardModel): Values {
@@ -59,33 +58,27 @@ async function main(): Promise<void> {
     // 4. Bake the static background ONCE (cached; never re-baked on edits).
     const background = bakeBackground(psd);
 
-    // 5. Seed state from the model's captured values.
+    // 5. Seed state + wire the live-preview edit loop (panel + debounced re-render).
     const seed = seedFromModel(model);
-    const state = createAppState(seed);
-
-    // 6. Build the field panel (edits push into state; debounce lives in state).
-    const panel = createFieldPanel({
+    const live = createLivePreview({
       fields: EDITABLE_FIELDS,
       seed,
-      onInput: (id, value) => state.set(id, value),
+      model,
+      background,
     });
 
-    // 7. Mount the layout and grab the render context + export controls.
+    // 6. Mount the layout and grab the render context + export controls.
     const { canvas, ctx, exportButton, statusEl } = buildLayout(
       root,
       model.width,
       model.height,
-      panel,
+      live.panel,
     );
 
-    // The ONLY thing that re-runs on an edit: redraw editable text over the cache.
-    const render = (values: Values): void => renderCard(ctx, background, model, values);
+    // 7. First render + subscribe debounced live updates (needs the mounted context).
+    live.start(ctx);
 
-    // 8. First render, then subscribe for debounced live updates.
-    render(state.getAll());
-    state.subscribe(render);
-
-    // 9. Wire export (user picks folder + filename every time).
+    // 8. Wire export (user picks folder + filename every time).
     exportButton.addEventListener('click', async () => {
       try {
         statusEl.textContent = 'Saving…';

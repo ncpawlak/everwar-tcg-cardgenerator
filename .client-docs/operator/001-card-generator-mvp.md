@@ -45,6 +45,10 @@ Type in any field. The preview updates **automatically** a fraction of a second 
 stop typing — there's no "apply" button. The title keeps its small-caps look as you edit;
 the abilities text re-wraps and stays inside its box (text past the bottom is hidden).
 
+**Long text auto-shrinks.** If you type a name, faction, or stat that's wider than its
+slot, it's automatically condensed (tightened, then scaled down) so it stays on the card
+instead of spilling over. Very long entries stop shrinking at a readable minimum size.
+
 ## Exporting
 
 1. Click **Export PNG…**.

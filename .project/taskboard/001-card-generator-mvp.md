@@ -504,3 +504,22 @@ render-path change without exception.
 - v1 Non-Goals (spec §9): art placement, hi-res/DPI export, multi-template/batch,
   editing locked labels/chips, desktop packaging, any server/native render path.
 
+
+---
+
+## Post-review refinements (Gate 2 → pre-push, user-approved)
+
+Applied after both Gate 2 reviews signed off; full suite kept green (59 tests).
+
+- **FIX-1 — Single-line shrink-to-fit (spec refinement, see `spec.md` §4.5).**
+  Single-line fields (title + faction/tags/stat values) now shrink to fit their slot
+  instead of overflowing: condense tracking up to 8%/gap, then scale font down floored
+  at 0.6x. The title scales both small-caps runs by one factor (ratio preserved). Slot
+  width = PSD layer bounds x1.15 allowance (single-line); authored title never shrinks.
+  New pure module `src/render/fitText.ts` + changes to `layoutTitle.ts`/`drawText.ts`.
+  Unit-tested in `test/fitText.test.ts` and `test/layoutTitle.test.ts` (no canvas).
+- **FIX-2 — Composition-wiring integration test.** Wiring extracted to
+  `src/app/livePreview.ts` (`createLivePreview`); `test/livePreview.test.ts` proves
+  edit -> debounce -> exactly one text-only re-render (fake timers, injected renderer).
+- **FIX-3 — Preview shell smoke test.** `test/preview.test.ts` asserts `buildLayout`
+  builds the shell + a 690x1020 canvas with a 2D context.

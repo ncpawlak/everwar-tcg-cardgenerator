@@ -92,3 +92,22 @@ never "should pass."
 - **"Inject-the-measurer for testable canvas text layout"** — pure layout fns taking
   `measure(text,font)` so wrap/advance logic is unit-testable without a canvas.
   Universal TDD/testing pattern.
+
+---
+
+## Addendum (2026-08-23, post-Gate-2, user-approved refinements)
+
+- **Single-line shrink-to-fit** added as a new pure layer-core module
+  `src/render/fitText.ts` (`computeFit`, `layoutSingleLine`), consumed by
+  `drawText.ts`; `layoutTitle.ts` gained an optional `availableWidth` param for
+  uniform (ratio-preserving) title scaling. Decision: derive each field's slot width
+  from its **PSD layer bounds** (no explicit container width exists in the PSD); apply
+  a 1.15x allowance to single-line fields so authored values stay pixel-identical
+  (measured ink runs ~9% past the tight bounds). Tracking (<=8%/gap) is tried before
+  font scaling; scale is floored at 0.6x for readability. The authored title (runs
+  cover the text) is never shrunk, protecting the baked baseline / fidelity render
+  (still 0.914%). Kept in the measurer-injected core so it is canvas-free unit-testable.
+- **Composition wiring** extracted from `main.ts` into `src/app/livePreview.ts`
+  (`createLivePreview`) with an injectable renderer, enabling an integration test of
+  the edit -> debounce -> single re-render loop. `main.ts` now delegates to it.
+- Test count 46 -> 59, all green; build + lint clean. No push (Gate 2.5 is the user's).

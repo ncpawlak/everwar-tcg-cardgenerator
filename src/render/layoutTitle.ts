@@ -5,6 +5,7 @@
 // advancing by measured width, baseline at the engine transform. NEVER couples to a
 // live canvas — STORY-9 passes `ctx.measureText`.
 import type { StyleRun, Anchor } from '../psd/types';
+import { MIN_SCALE } from './fitText';
 
 /** A single positioned run ready to draw with `fillText`. */
 export interface TitleDrawOp {
@@ -75,6 +76,12 @@ function segmentsSmallCaps(text: string, runs: StyleRun[]): Segment[] {
  *
  * If the provided styleRuns exactly cover the text (original PSD title), they are
  * honored verbatim; otherwise the small-caps rule regenerates runs for edited text.
+ *
+ * FIX-1 — shrink-to-fit: an edited title that is wider than `availableWidth` (its dark
+ * bar, proxied by the layer bounds) is scaled down uniformly so BOTH small-caps run
+ * sizes shrink by the same factor — preserving the initial-cap / body ratio — floored
+ * at MIN_SCALE for readability. The authored PSD title (runs cover the text) is never
+ * shrunk, so the baked baseline / fidelity render is unaffected.
  */
 export function layoutTitle(
   text: string,
@@ -82,6 +89,7 @@ export function layoutTitle(
   family: string,
   anchor: Anchor,
   measure: Measure,
+  availableWidth = Infinity,
 ): TitleDrawOp[] {
   if (text.length === 0) return [];
 
@@ -93,10 +101,25 @@ export function layoutTitle(
     ? segmentsFromRuns(text, styleRuns)
     : segmentsSmallCaps(text, styleRuns);
 
+  // The authored title renders at its authored sizes (never shrinks); shrink-to-fit
+  // applies only to edited titles whose runs no longer cover the text.
+  const effectiveAvail = runsCoverText ? Infinity : availableWidth;
+
+  // Native width of all runs at authored sizes; scale uniformly if it overflows.
+  const nativeWidth = segments.reduce(
+    (sum, seg) => sum + measure(seg.text, fontString(seg.size, family)),
+    0,
+  );
+  const scale =
+    effectiveAvail > 0 && nativeWidth > effectiveAvail
+      ? Math.max(effectiveAvail / nativeWidth, MIN_SCALE)
+      : 1;
+
   const ops: TitleDrawOp[] = [];
   let x = anchor.x;
   for (const seg of segments) {
-    const font = fontString(seg.size, family);
+    // Scale both run sizes by the same factor → small-caps ratio is preserved.
+    const font = fontString(seg.size * scale, family);
     ops.push({ text: seg.text, font, x, y: anchor.y });
     // Advance by the measured width of THIS run for the next run's start.
     x += measure(seg.text, font);

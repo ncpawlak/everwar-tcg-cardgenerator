@@ -21,6 +21,7 @@ main.ts (composition root)
   bakeBackground()   → composite non-editable leaves → cached raster (ONCE)
   createAppState()   → seeded values + ~120ms debounced notify
   createFieldPanel() → inputs (9) + abilities textarea; edits → state.set
+  createLivePreview()→ panel + state + start(ctx): first render + debounced subscribe
   buildLayout()      → canvas preview + Export button + status
   renderCard()       → draw cached bg + all editable fields  (ONLY this re-runs on edit)
   exportPng()        → canvas.toBlob('image/png') → showSaveFilePicker → write
@@ -43,11 +44,13 @@ src/
 ├─ fonts/loadFonts.ts          FontFace register, fail-loud, injectable deps
 ├─ render/
 │  ├─ bakeBackground.ts        back-to-front drawImage of non-editable leaves
-│  ├─ layoutTitle.ts           PURE per-run small-caps advance (injected measurer)
+│  ├─ layoutTitle.ts           PURE per-run small-caps advance + shrink-to-fit
+│  ├─ fitText.ts               PURE single-line shrink-to-fit (tracking→scale)
 │  ├─ wrapText.ts              PURE greedy word-wrap + clip (injected measurer)
 │  ├─ drawText.ts              draw one field (single-line / title / abilities+clip)
 │  └─ renderCard.ts            bg + every field (the edit-time redraw)
 ├─ state/appState.ts           values + debounced subscribe
+├─ app/livePreview.ts          edit-loop wiring (panel+state+debounced render)
 ├─ ui/fieldPanel.ts            labelled controls from config + seed
 ├─ ui/preview.ts               two-column layout, canvas, export button
 └─ export/exportPng.ts         toBlob → showSaveFilePicker (download fallback)
@@ -73,11 +76,17 @@ src/
   `ag-psd`'s `initializeCanvas`; it never enters the browser bundle.
 - **Transparency preserved** — the canvas is never filled opaque, so export matches the
   PSD's transparent regions.
+- **Single-line shrink-to-fit** (`fitText.ts`) — long edits never overflow: condense
+  tracking (≤8%/gap) first, then scale the font down (floored 0.6×). The slot width is
+  the field's PSD layer bounds × 1.15 (single-line); the title scales both small-caps
+  runs by one factor (ratio preserved) and the authored title never shrinks. Pure and
+  measurer-injected, so it is canvas-free unit-testable (spec §4.5).
 
-## Tests (Vitest — 46 tests, all green)
+## Tests (Vitest — 59 tests, all green)
 
 - Pure logic (node env): `config`, `loadFonts` (jsdom), `layoutTitle`, `wrapText`,
-  `appState`, `fieldPanel` (jsdom), `exportPng` (jsdom).
+  `fitText`, `appState`, `fieldPanel` (jsdom), `livePreview` (jsdom), `preview` (jsdom),
+  `exportPng` (jsdom).
 - Pixel/compositing (napi canvas + real OTFs): `loadPsd`, `extractModel`,
   `bakeBackground`, `renderCard`, and the **fidelity** regression.
 - **Fidelity gate** (`fidelity.test.ts`): renders the original PSD values and diffs
@@ -95,7 +104,8 @@ src/
 
 - Chromium-only export (`showSaveFilePicker`); an `<a download>` fallback exists but the
   primary path is the Save dialog.
-- Edited single-line values are not re-fitted if they overflow their original slot
-  (v1 renders point-type as-is).
+- Edited single-line values shrink-to-fit their slot (tracking then scale, floored at
+  0.6×); extremely long values stay legible at the floor and may slightly exceed the
+  tight slot by design.
 - Non-goals deferred to backlog: art placement, hi-res/DPI export, multi-template/batch,
   editing locked labels/chips.

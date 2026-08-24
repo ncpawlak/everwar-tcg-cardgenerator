@@ -68,7 +68,8 @@ pre-filled with the PSD's current values on load.
 
 **Single-line value** fields render using the layer's captured font family, font
 size, fill color, justification, and position/`transform` from the PSD text-engine
-data. They do not wrap.
+data. They do not wrap. To prevent long edits from overflowing the card horizontally,
+each single-line field (and the title) is **shrink-to-fit**: see §4.5.
 
 ### Locked / non-editable (v1)
 
@@ -110,15 +111,42 @@ recomposited on edits.
 Draw the cached background, then render the editable text over it on the Canvas:
 
 - **Single-line values** — draw with the captured font/size/color/justification at
-  the layer position.
+  the layer position, **shrunk to fit** the field's slot width (§4.5).
 - **Title (`Name text`)** — honor **per-run sizing** from `styleRuns`; draw each
   run sequentially, advancing x by measured width, baseline at the engine
-  `transform`. Do **not** assume one size per layer.
+  `transform`. Do **not** assume one size per layer. Edited titles are **shrunk to
+  fit** their slot, scaling both small-caps run sizes by the same factor so the
+  initial-cap / body ratio is preserved (§4.5).
 - **Abilities body** — word-wrap the text within the padded area (x=59, y=824,
   w=583) in white **Square721BT-RomanCondensed**, ~**21px** font / ~**25px**
   line-height, **clipped** to the box bottom (37,808)–(664,968).
 
 Only step 4.3 re-runs on an edit; parse and bake do not repeat.
+
+### 4.5 Single-line shrink-to-fit (user-approved refinement)
+
+Single-line fields must never overflow their slot horizontally. When a value's
+measured width at its authored size exceeds the available slot width, the renderer
+condenses it in two capped stages, in this order:
+
+1. **Tracking first** — apply a small negative letter-spacing, up to **8% of the
+   font size per inter-glyph gap**.
+2. **Then font scaling** — if tracking alone is insufficient, scale the font size
+   down, **floored at 0.6×** (readability cap). At the floor, extremely long values
+   remain legible and stay on-card, though they may slightly exceed the tight slot.
+
+The **title** uses font-scaling only (no tracking) and scales **both** small-caps
+runs by the same factor, preserving the authored initial-cap / body size ratio.
+
+**Available slot width.** The PSD gives no explicit container width for these fields,
+so the slot is derived from each field's **PSD layer bounds** (the rendered ink
+extent). Single-line fields add a **1.15× allowance** because the authored values
+measure up to ~9% wider than their tight bounds (glyph side-bearings); this keeps the
+original card pixel-identical while still catching genuinely-too-long edits. The
+authored title (whose `styleRuns` still cover the text) is **never** shrunk, so the
+baked baseline / fidelity render is unaffected. This logic lives in the pure,
+measurer-injected layout core (`src/render/fitText.ts`, `layoutTitle.ts`) and is
+unit-tested without a canvas.
 
 ### 4.4 Fidelity notes
 

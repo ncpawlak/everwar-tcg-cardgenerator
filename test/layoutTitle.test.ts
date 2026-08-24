@@ -58,4 +58,45 @@ describe('layoutTitle', () => {
     const ops = layoutTitle('', [], FAMILY, ANCHOR, measure);
     expect(ops).toEqual([]);
   });
+
+  // FIX-1 — shrink-to-fit for edited titles.
+  it('shrinks an over-long edited title to fit the available width', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const available = 80; // deliberately narrower than the native width
+    const ops = layoutTitle('AB CD', runs, FAMILY, ANCHOR, measure, available);
+    // Final advance (last op start + its width) must fit within the available width.
+    const last = ops[ops.length - 1];
+    const totalWidth = last.x - ANCHOR.x + measure(last.text, last.font);
+    expect(totalWidth).toBeLessThanOrEqual(available + 1e-6);
+  });
+
+  it('preserves the small-caps size ratio when shrinking', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const ops = layoutTitle('AB CD', runs, FAMILY, ANCHOR, measure, 80);
+    // ops: A(big) B(small) ' '(small) C(big) D(small)
+    const big = parseFloat(ops[0].font);
+    const small = parseFloat(ops[1].font);
+    expect(big).toBeLessThan(45.83); // actually shrank
+    // Ratio between the two run sizes is unchanged from the authored 45.83 / 37.5.
+    expect(big / small).toBeCloseTo(45.83 / 37.5, 5);
+  });
+
+  it('never shrinks the authored PSD title even under a tiny available width', () => {
+    // Runs exactly cover the text (original title) → authored sizes are preserved.
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const ops = layoutTitle('IRONFIST COMMANDER', runs, FAMILY, ANCHOR, measure, 10);
+    expect(parseFloat(ops[0].font)).toBeCloseTo(45.83, 2);
+    expect(parseFloat(ops[1].font)).toBeCloseTo(37.5, 2);
+  });
 });
