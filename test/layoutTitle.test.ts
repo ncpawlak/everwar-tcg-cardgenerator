@@ -1,0 +1,61 @@
+// STORY-7 test — title layout is a PURE function taking an injected measurer, so the
+// faux small-caps advance math is unit-testable with no canvas. Stub measurer returns
+// text.length * fontSizePx * k so widths are deterministic.
+import { describe, it, expect } from 'vitest';
+import { layoutTitle } from '../src/render/layoutTitle';
+import type { StyleRun } from '../src/psd/types';
+
+const FAMILY = 'Square721BT-BoldCondensed';
+const ANCHOR = { x: 69.63, y: 75.92 };
+const K = 0.5;
+// Deterministic measurer: parses the px size out of the font string.
+const measure = (text: string, font: string) => text.length * parseFloat(font) * K;
+
+describe('layoutTitle', () => {
+  it('produces 4 positioned ops for the real title runs with correct substrings', () => {
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const ops = layoutTitle('IRONFIST COMMANDER', runs, FAMILY, ANCHOR, measure);
+    expect(ops.map((o) => o.text)).toEqual(['I', 'RONFIST ', 'C', 'OMMANDER']);
+    // All ops share the baseline y.
+    for (const o of ops) expect(o.y).toBe(ANCHOR.y);
+    // x is monotonically increasing.
+    for (let i = 1; i < ops.length; i++) expect(ops[i].x).toBeGreaterThan(ops[i - 1].x);
+    // Cumulative x math: each op's x = anchor + sum of prior measured widths.
+    let x = ANCHOR.x;
+    for (const o of ops) {
+      expect(o.x).toBeCloseTo(x, 5);
+      x += measure(o.text, o.font);
+    }
+  });
+
+  it('re-segments arbitrary edited text via the small-caps rule (first glyph large)', () => {
+    // styleRuns whose lengths do not match the new text → regenerate small-caps runs.
+    const runs: StyleRun[] = [
+      { length: 1, fontSize: 45.83 },
+      { length: 8, fontSize: 37.5 },
+    ];
+    const ops = layoutTitle('AB CD', runs, FAMILY, ANCHOR, measure);
+    // Expect: 'A'(big) 'B'(small) ' '(small) 'C'(big) 'D'(small)
+    expect(ops.map((o) => o.text)).toEqual(['A', 'B', ' ', 'C', 'D']);
+    expect(parseFloat(ops[0].font)).toBeCloseTo(45.83, 1);
+    expect(parseFloat(ops[1].font)).toBeCloseTo(37.5, 1);
+    expect(parseFloat(ops[3].font)).toBeCloseTo(45.83, 1);
+  });
+
+  it('handles a single word', () => {
+    const runs: StyleRun[] = [{ length: 1, fontSize: 45.83 }];
+    const ops = layoutTitle('X', runs, FAMILY, ANCHOR, measure);
+    expect(ops.map((o) => o.text)).toEqual(['X']);
+    expect(ops[0].x).toBeCloseTo(ANCHOR.x, 5);
+  });
+
+  it('returns no ops for empty text', () => {
+    const ops = layoutTitle('', [], FAMILY, ANCHOR, measure);
+    expect(ops).toEqual([]);
+  });
+});
