@@ -1,0 +1,32 @@
+// STORY-9 — renderCard orchestrator. Draws the cached background once, then every
+// editable field over it, at 690×1020. This is the ONLY path that re-runs on an edit;
+// it never re-parses the PSD or re-bakes the background (spec §4.3, §5).
+import type { CardModel } from '../psd/types';
+import { drawText, type Ctx2D } from './drawText';
+
+/** Anything drawImage accepts as a source (canvas/bitmap). Typed loosely for env. */
+export type BackgroundSource = any;
+
+/**
+ * Render the full card: clear, draw the cached background, then draw all fields in
+ * model order using the current `values` (field id → text).
+ */
+export function renderCard(
+  ctx: Ctx2D,
+  background: BackgroundSource,
+  model: CardModel,
+  values: Record<string, string>,
+): void {
+  // Clear to transparent so the export preserves the PSD's transparency (never fill
+  // an opaque colour). Then blit the pre-baked background.
+  ctx.clearRect(0, 0, model.width, model.height);
+  ctx.drawImage(background, 0, 0);
+
+  // Draw each editable field over the background in defined order.
+  for (const id of model.order) {
+    const field = model.fields[id];
+    // Fall back to the model's captured text if no live value is present.
+    const value = values[id] ?? field.text;
+    drawText(ctx, field, value);
+  }
+}
